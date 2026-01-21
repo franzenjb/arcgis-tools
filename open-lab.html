@@ -1,0 +1,3531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIS Open Laboratory | Dragon's Toolkit</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Mapping Libraries -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/deck.gl@8.9.33/dist.min.js"></script>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.113/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.113/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDU503tT4TzowFt7A4J-NlEo_f2VYH-dY8&libraries=places,visualization&callback=Function.prototype" async defer></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
+    <link rel="stylesheet" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.28/"></script>
+
+    <!-- Code Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+
+    <style>
+        :root {
+            --red-primary: #d32f2f;
+            --red-dark: #b71c1c;
+            --red-light: #ffcdd2;
+            --gray-900: #111827;
+            --gray-800: #1f2937;
+            --gray-700: #374151;
+            --gray-600: #4b5563;
+            --gray-500: #6b7280;
+            --gray-400: #9ca3af;
+            --gray-300: #d1d5db;
+            --gray-200: #e5e7eb;
+            --gray-100: #f3f4f6;
+            --gray-50: #f9fafb;
+            --blue-500: #3b82f6;
+            --green-500: #22c55e;
+            --amber-500: #f59e0b;
+            --purple-500: #8b5cf6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 100%);
+            color: white;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--red-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .logo-text span {
+            font-size: 0.85rem;
+            color: var(--gray-400);
+            font-weight: 400;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            font-size: 0.875rem;
+            color: var(--gray-400);
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 0;
+            padding: 0 2rem;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            color: var(--gray-400);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .nav-tab:hover {
+            color: white;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .nav-tab.active {
+            color: white;
+            border-bottom-color: var(--red-primary);
+        }
+
+        /* Main Content */
+        .main {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Section Styles */
+        .section-header {
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header p {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+            max-width: 800px;
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--gray-200);
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 1rem;
+        }
+
+        .card-icon.red { background: var(--red-light); }
+        .card-icon.blue { background: #dbeafe; }
+        .card-icon.green { background: #dcfce7; }
+        .card-icon.amber { background: #fef3c7; }
+        .card-icon.purple { background: #ede9fe; }
+
+        .card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--gray-900);
+        }
+
+        .card p {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+
+        .tag.python { background: #fef3c7; color: #92400e; }
+        .tag.js { background: #fef9c3; color: #854d0e; }
+        .tag.api { background: #dbeafe; color: #1e40af; }
+        .tag.ai { background: #ede9fe; color: #5b21b6; }
+        .tag.live { background: #dcfce7; color: #166534; }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--gray-900);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--gray-800);
+            border-bottom: 1px solid var(--gray-700);
+        }
+
+        .code-header span {
+            color: var(--gray-400);
+            font-size: 0.85rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .code-header button {
+            background: var(--gray-700);
+            border: none;
+            color: var(--gray-300);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .code-header button:hover {
+            background: var(--gray-600);
+        }
+
+        .code-block pre {
+            margin: 0;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.7;
+        }
+
+        /* Interactive Playground */
+        .playground {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 1024px) {
+            .playground {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .playground-editor {
+            background: var(--gray-900);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .playground-editor textarea {
+            width: 100%;
+            min-height: 300px;
+            background: transparent;
+            border: none;
+            color: #e5e7eb;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            padding: 1rem;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .playground-editor textarea:focus {
+            outline: none;
+        }
+
+        .playground-output {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+        }
+
+        .playground-output .map-container {
+            height: 400px;
+            width: 100%;
+        }
+
+        .run-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--green-500);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .run-btn:hover {
+            background: #16a34a;
+            transform: scale(1.02);
+        }
+
+        /* Tier Sections */
+        .tier {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 20px;
+            border: 1px solid var(--gray-200);
+        }
+
+        .tier-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .tier-number {
+            width: 40px;
+            height: 40px;
+            background: var(--red-primary);
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .tier-title h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .tier-title p {
+            color: var(--gray-500);
+            font-size: 0.9rem;
+        }
+
+        /* Capabilities List */
+        .capabilities {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .capability {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--gray-50);
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .capability:hover {
+            background: var(--gray-100);
+        }
+
+        .capability-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .capability h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+
+        .capability p {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+        }
+
+        /* Library Showcase */
+        .library-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .library-card {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .library-card:hover {
+            border-color: var(--red-primary);
+            transform: translateY(-2px);
+        }
+
+        .library-card.selected {
+            border-color: var(--red-primary);
+            background: #fef2f2;
+        }
+
+        .library-card img {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            margin-bottom: 0.75rem;
+        }
+
+        .library-card h4 {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+
+        .library-card p {
+            font-size: 0.8rem;
+            color: var(--gray-500);
+        }
+
+        /* Status Indicators */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .status-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .status-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--gray-200);
+        }
+
+        .status-card .label {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+            margin-bottom: 0.5rem;
+        }
+
+        .status-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .status-card .change {
+            font-size: 0.85rem;
+            color: var(--green-500);
+            margin-top: 0.25rem;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--gray-200);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 0.25rem;
+            width: 12px;
+            height: 12px;
+            background: var(--red-primary);
+            border-radius: 50%;
+            transform: translateX(-5px);
+        }
+
+        .timeline-item.completed::before {
+            background: var(--green-500);
+        }
+
+        .timeline-date {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-desc {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--gray-900);
+            color: var(--gray-400);
+            padding: 3rem 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer a {
+            color: var(--gray-300);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: white;
+        }
+
+        /* Example Runner */
+        .example-runner {
+            background: var(--gray-800);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .example-runner select {
+            background: var(--gray-700);
+            border: 1px solid var(--gray-600);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Quick Commands */
+        .command-palette {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid var(--gray-200);
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .command-input {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .command-input input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .command-input input:focus {
+            outline: none;
+            border-color: var(--red-primary);
+        }
+
+        .command-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .command-suggestion {
+            background: var(--gray-100);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.2s;
+        }
+
+        .command-suggestion:hover {
+            background: var(--red-light);
+            color: var(--red-dark);
+        }
+
+        /* API Reference */
+        .api-section {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid var(--gray-200);
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .api-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            cursor: pointer;
+        }
+
+        .api-header h4 {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .api-method {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .api-method.get { background: #dcfce7; color: #166534; }
+        .api-method.post { background: #dbeafe; color: #1e40af; }
+        .api-method.put { background: #fef3c7; color: #92400e; }
+        .api-method.delete { background: #fee2e2; color: #991b1b; }
+
+        .api-body {
+            padding: 1.5rem;
+            display: none;
+        }
+
+        .api-body.open {
+            display: block;
+        }
+
+        /* Demo Buttons */
+        .demo-btn {
+            background: var(--gray-700);
+            color: var(--gray-300);
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .demo-btn:hover {
+            background: var(--gray-600);
+            color: white;
+        }
+
+        .demo-btn.active {
+            background: var(--red-primary);
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            #playground > div:last-child {
+                grid-template-columns: 1fr !important;
+                height: auto !important;
+            }
+
+            #playground > div:last-child > div {
+                min-height: 350px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header-top {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .main {
+                padding: 1rem;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-top">
+            <div class="logo">
+                <div class="logo-icon">🔬</div>
+                <div class="logo-text">
+                    <h1>GIS Open Laboratory</h1>
+                    <span>Dragon's Modern Mapping Toolkit</span>
+                </div>
+            </div>
+            <div class="header-meta">
+                <div class="status-badge">Lab Active</div>
+                <span>v1.0.0 | January 2025</span>
+            </div>
+        </div>
+        <nav class="nav-tabs">
+            <a class="nav-tab active" data-tab="overview">Overview</a>
+            <a class="nav-tab" data-tab="accomplished">What We Built</a>
+            <a class="nav-tab" data-tab="powers">Powers & Tools</a>
+            <a class="nav-tab" data-tab="playground">Live Playground</a>
+            <a class="nav-tab" data-tab="libraries">Map Libraries</a>
+            <a class="nav-tab" data-tab="apis">External APIs</a>
+            <a class="nav-tab" data-tab="ai">AI Integration</a>
+            <a class="nav-tab" data-tab="roadmap">Roadmap</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+
+        <!-- OVERVIEW TAB -->
+        <section id="overview" class="tab-content active">
+            <div class="section-header">
+                <h2>Welcome to the Open Laboratory</h2>
+                <p>A living workspace for exploring modern GIS development - beyond point-and-click, into the realm of APIs, automation, AI, and real power.</p>
+            </div>
+
+            <div class="status-grid">
+                <div class="status-card">
+                    <div class="label">Tools Built</div>
+                    <div class="value">4</div>
+                    <div class="change">OAuth, Dependency Mapper, Diagrams, Explorer</div>
+                </div>
+                <div class="status-card">
+                    <div class="label">Libraries Integrated</div>
+                    <div class="value">6+</div>
+                    <div class="change">ArcGIS, Leaflet, Mapbox, Census, FEMA...</div>
+                </div>
+                <div class="status-card">
+                    <div class="label">API Connections</div>
+                    <div class="value">Ready</div>
+                    <div class="change">OAuth2 authenticated</div>
+                </div>
+                <div class="status-card">
+                    <div class="label">Lab Status</div>
+                    <div class="value" style="color: var(--green-500);">Active</div>
+                    <div class="change">Expanding capabilities</div>
+                </div>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-icon red">🔐</div>
+                    <h3>OAuth2 Mastery</h3>
+                    <p>Secure, persistent authentication with profile caching. Connect once, work forever. No more password prompts.</p>
+                    <div class="card-tags">
+                        <span class="tag python">Python</span>
+                        <span class="tag api">ArcGIS API</span>
+                        <span class="tag live">Working</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-icon blue">🗺️</div>
+                    <h3>Multi-Library Maps</h3>
+                    <p>Same data, different renderers. Leaflet for lightweight, Mapbox for style, ArcGIS for power. Choose your weapon.</p>
+                    <div class="card-tags">
+                        <span class="tag js">JavaScript</span>
+                        <span class="tag api">Multiple APIs</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-icon green">⚡</div>
+                    <h3>Automation Ready</h3>
+                    <p>Scripts that run while you sleep. Scheduled syncs, change detection, automated reports.</p>
+                    <div class="card-tags">
+                        <span class="tag python">Python</span>
+                        <span class="tag api">Cron/Scheduler</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-icon purple">🤖</div>
+                    <h3>AI-Powered Analysis</h3>
+                    <p>Natural language to map operations. AI geocoding, content tagging, anomaly detection.</p>
+                    <div class="card-tags">
+                        <span class="tag ai">Claude AI</span>
+                        <span class="tag python">Python</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Philosophy Section -->
+            <div class="tier">
+                <div class="tier-header">
+                    <div class="tier-number">💡</div>
+                    <div class="tier-title">
+                        <h3>The Philosophy</h3>
+                        <p>Why code when you can click? Because clicking doesn't scale.</p>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <h4 style="margin-bottom: 1rem; color: var(--gray-500);">Traditional GIS</h4>
+                        <ul style="list-style: none; color: var(--gray-600);">
+                            <li style="padding: 0.5rem 0;">❌ Open portal, find layer, click properties...</li>
+                            <li style="padding: 0.5rem 0;">❌ One map at a time</li>
+                            <li style="padding: 0.5rem 0;">❌ Manual data updates</li>
+                            <li style="padding: 0.5rem 0;">❌ "I'll update that tomorrow"</li>
+                            <li style="padding: 0.5rem 0;">❌ Knowledge locked in your head</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 1rem; color: var(--red-primary);">Open Laboratory</h4>
+                        <ul style="list-style: none; color: var(--gray-800);">
+                            <li style="padding: 0.5rem 0;">✅ <code>python update_all.py</code> - done</li>
+                            <li style="padding: 0.5rem 0;">✅ Deploy 50 maps with one script</li>
+                            <li style="padding: 0.5rem 0;">✅ Live feeds from FEMA, NOAA, Census</li>
+                            <li style="padding: 0.5rem 0;">✅ Cron job handles it at 3am</li>
+                            <li style="padding: 0.5rem 0;">✅ Code IS the documentation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- WHAT WE BUILT TAB -->
+        <section id="accomplished" class="tab-content">
+            <div class="section-header">
+                <h2>What We've Built</h2>
+                <p>Real tools, working code, proven patterns. These are the building blocks.</p>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item completed">
+                    <div class="timeline-date">Completed</div>
+                    <div class="timeline-title">OAuth2 Authentication Module</div>
+                    <div class="timeline-desc">Secure connection to ArcGIS Online with profile caching. Authenticates once, persists forever.</div>
+                    <div class="code-block" style="margin-top: 1rem;">
+                        <div class="code-header">
+                            <span>auth.py</span>
+                            <button onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-python">from arcgis.gis import GIS
+
+def get_gis():
+    # Try notebook environment first
+    try:
+        gis = GIS("home")
+        return gis
+    except:
+        pass
+
+    # OAuth with profile caching - only prompts first time
+    gis = GIS("https://arc-nhq-gis.maps.arcgis.com",
+              client_id="jqKdrlF5fVjac4Xw",
+              profile="redcross")
+    print(f"Connected as {gis.users.me.username}")
+    return gis</code></pre>
+                    </div>
+                </div>
+
+                <div class="timeline-item completed">
+                    <div class="timeline-date">Completed</div>
+                    <div class="timeline-title">Dependency Mapper</div>
+                    <div class="timeline-desc">Analyzes item relationships. Know what breaks before you delete. Generates Mermaid diagrams.</div>
+                    <div class="code-block" style="margin-top: 1rem;">
+                        <div class="code-header">
+                            <span>dependency_mapper.py</span>
+                            <button onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-python">def find_item_references(obj, path=""):
+    """Recursively find all item references in a JSON structure"""
+    refs = []
+    if isinstance(obj, dict):
+        if "itemId" in obj and obj["itemId"]:
+            refs.append({"itemId": obj["itemId"], "path": path})
+        for key, value in obj.items():
+            refs.extend(find_item_references(value, f"{path}.{key}"))
+    elif isinstance(obj, list):
+        for i, item in enumerate(obj):
+            refs.extend(find_item_references(item, f"{path}[{i}]"))
+    return refs
+
+# Usage: python dependency_mapper.py --mermaid ITEM_ID</code></pre>
+                    </div>
+                </div>
+
+                <div class="timeline-item completed">
+                    <div class="timeline-date">Completed</div>
+                    <div class="timeline-title">Orphan Content Finder</div>
+                    <div class="timeline-desc">Identified 27KB of orphaned items in orphans.csv. Cleanup ready.</div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-date">In Progress</div>
+                    <div class="timeline-title">Heat Map Animation System</div>
+                    <div class="timeline-desc">Temporal visualization of data changes over time.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- POWERS & TOOLS TAB -->
+        <section id="powers" class="tab-content">
+            <div class="section-header">
+                <h2>Powers & Tools Reference</h2>
+                <p>The complete capability map. Everything ArcGIS Python API can do - organized by power level.</p>
+            </div>
+
+            <div class="tier">
+                <div class="tier-header">
+                    <div class="tier-number">1</div>
+                    <div class="tier-title">
+                        <h3>Content Automation</h3>
+                        <p>Master your content programmatically</p>
+                    </div>
+                </div>
+                <div class="capabilities">
+                    <div class="capability">
+                        <span class="capability-icon">📋</span>
+                        <div>
+                            <h4>Bulk Clone Items</h4>
+                            <p>Clone maps, apps, layers across orgs with one command</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">🎨</span>
+                        <div>
+                            <h4>Programmatic Symbology</h4>
+                            <p>Set colors, renderers, labels without opening a map</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">💬</span>
+                        <div>
+                            <h4>Popup Configuration</h4>
+                            <p>Build rich popups with Arcade expressions in code</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">📊</span>
+                        <div>
+                            <h4>Dashboard Generation</h4>
+                            <p>Create dashboards from templates automatically</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">🏷️</span>
+                        <div>
+                            <h4>Metadata Management</h4>
+                            <p>Bulk update tags, descriptions, credits</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">📁</span>
+                        <div>
+                            <h4>Folder Organization</h4>
+                            <p>Move, organize, clean up content at scale</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block" style="margin-top: 1.5rem;">
+                    <div class="code-header">
+                        <span>Example: Clone a Web Map to another org</span>
+                        <button onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-python">from arcgis.gis import GIS
+
+source = GIS("https://source-org.maps.arcgis.com", profile="source")
+target = GIS("https://target-org.maps.arcgis.com", profile="target")
+
+# Get the item
+webmap = source.content.get("abc123def456")
+
+# Clone it - handles all dependencies automatically
+cloned = target.content.clone_items(
+    items=[webmap],
+    folder="Cloned Maps",
+    copy_data=True  # Also copies the data, not just references
+)
+
+print(f"Cloned: {cloned[0].title} -> {cloned[0].id}")</code></pre>
+                </div>
+            </div>
+
+            <div class="tier">
+                <div class="tier-header">
+                    <div class="tier-number">2</div>
+                    <div class="tier-title">
+                        <h3>Data Pipelines</h3>
+                        <p>Move, transform, sync data automatically</p>
+                    </div>
+                </div>
+                <div class="capabilities">
+                    <div class="capability">
+                        <span class="capability-icon">🔄</span>
+                        <div>
+                            <h4>Feature Layer CRUD</h4>
+                            <p>Add, update, delete features programmatically</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">📤</span>
+                        <div>
+                            <h4>Append/Truncate</h4>
+                            <p>Bulk load data, replace entire layers</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">🔍</span>
+                        <div>
+                            <h4>Spatial Queries</h4>
+                            <p>Query by geometry, attributes, relationships</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">⚙️</span>
+                        <div>
+                            <h4>Schema Management</h4>
+                            <p>Add fields, change types, manage domains</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">🌐</span>
+                        <div>
+                            <h4>External API Sync</h4>
+                            <p>Pull from FEMA, NOAA, Census, any REST API</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">📅</span>
+                        <div>
+                            <h4>Scheduled Updates</h4>
+                            <p>Cron jobs for automated data refresh</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block" style="margin-top: 1.5rem;">
+                    <div class="code-header">
+                        <span>Example: Sync FEMA Disaster Data</span>
+                        <button onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-python">import requests
+from arcgis.gis import GIS
+from arcgis.features import FeatureLayer
+
+gis = GIS(profile="redcross")
+
+# Fetch fresh FEMA data
+fema_url = "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries"
+response = requests.get(fema_url, params={"$top": 1000, "$orderby": "declarationDate desc"})
+disasters = response.json()["DisasterDeclarationsSummaries"]
+
+# Get our feature layer
+fl = FeatureLayer("https://services.arcgis.com/.../FeatureServer/0")
+
+# Truncate and append (fastest for full refresh)
+fl.manager.truncate()
+fl.edit_features(adds=[{
+    "attributes": {
+        "disaster_id": d["disasterNumber"],
+        "state": d["state"],
+        "type": d["incidentType"],
+        "declared": d["declarationDate"]
+    }
+} for d in disasters])
+
+print(f"Synced {len(disasters)} disasters")</code></pre>
+                </div>
+            </div>
+
+            <div class="tier">
+                <div class="tier-header">
+                    <div class="tier-number">3</div>
+                    <div class="tier-title">
+                        <h3>Spatial Analysis</h3>
+                        <p>Geometry operations and geoprocessing</p>
+                    </div>
+                </div>
+                <div class="capabilities">
+                    <div class="capability">
+                        <span class="capability-icon">⭕</span>
+                        <div>
+                            <h4>Buffer Analysis</h4>
+                            <p>Create buffers around features</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">✂️</span>
+                        <div>
+                            <h4>Overlay Operations</h4>
+                            <p>Intersect, union, erase, clip</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">📍</span>
+                        <div>
+                            <h4>Geocoding</h4>
+                            <p>Address to coordinates, batch geocoding</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">🛣️</span>
+                        <div>
+                            <h4>Routing</h4>
+                            <p>Directions, drive times, service areas</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">🔥</span>
+                        <div>
+                            <h4>Hot Spot Analysis</h4>
+                            <p>Find clusters and patterns</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">📐</span>
+                        <div>
+                            <h4>Geometry Functions</h4>
+                            <p>Area, length, centroid, simplify</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tier">
+                <div class="tier-header">
+                    <div class="tier-number">4</div>
+                    <div class="tier-title">
+                        <h3>Enterprise Operations</h3>
+                        <p>Admin-level control</p>
+                    </div>
+                </div>
+                <div class="capabilities">
+                    <div class="capability">
+                        <span class="capability-icon">👥</span>
+                        <div>
+                            <h4>User Management</h4>
+                            <p>Create, update, disable users in bulk</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">💳</span>
+                        <div>
+                            <h4>Credit Monitoring</h4>
+                            <p>Track usage, set alerts, budget control</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">🔒</span>
+                        <div>
+                            <h4>Sharing & Permissions</h4>
+                            <p>Manage groups, sharing levels, access</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">📊</span>
+                        <div>
+                            <h4>Usage Analytics</h4>
+                            <p>Who's using what, when, how much</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tier">
+                <div class="tier-header">
+                    <div class="tier-number">5</div>
+                    <div class="tier-title">
+                        <h3>Disaster Response</h3>
+                        <p>Red Cross specific capabilities</p>
+                    </div>
+                </div>
+                <div class="capabilities">
+                    <div class="capability">
+                        <span class="capability-icon">🚨</span>
+                        <div>
+                            <h4>Incident Deployment</h4>
+                            <p>One-command map deployment for disasters</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">🏠</span>
+                        <div>
+                            <h4>Shelter Tracking</h4>
+                            <p>Real-time shelter status and capacity</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">📝</span>
+                        <div>
+                            <h4>Situation Reports</h4>
+                            <p>Auto-generated sitreps with maps</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">🔗</span>
+                        <div>
+                            <h4>Partner Data Integration</h4>
+                            <p>Connect FEMA, state EOCs, partners</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LIVE PLAYGROUND TAB -->
+        <section id="playground" class="tab-content">
+            <!-- Clean minimal layout: dropdown + code + map -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; height: calc(100vh - 180px); min-height: 600px;">
+
+                <!-- Code Panel -->
+                <div style="display: flex; flex-direction: column; background: var(--gray-900); border-radius: 12px; overflow: hidden;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: var(--gray-800); border-bottom: 1px solid var(--gray-700);">
+                        <select id="demoSelect" onchange="loadDemoFromSelect()" style="background: var(--gray-700); border: 1px solid var(--gray-600); color: white; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; min-width: 200px; cursor: pointer;">
+                            <optgroup label="Leaflet">
+                                <option value="leaflet-realtime">Real-time Tracking</option>
+                                <option value="leaflet-draw">Draw Tools</option>
+                                <option value="leaflet-cluster">Clustering (500 pts)</option>
+                            </optgroup>
+                            <optgroup label="Mapbox GL">
+                                <option value="mapbox-3d-terrain">3D Terrain</option>
+                                <option value="mapbox-animate">Animated Path</option>
+                                <option value="mapbox-heatmap">Heatmap Layer</option>
+                            </optgroup>
+                            <optgroup label="ArcGIS REST API">
+                                <option value="arcgis-query">CA Counties (Query)</option>
+                                <option value="arcgis-sketch">DC Landmarks (Geocode)</option>
+                                <option value="arcgis-scene">NYC Subway (FeatureLayer)</option>
+                            </optgroup>
+                            <optgroup label="Alternative APIs">
+                                <option value="google-streetview">Satellite View (Esri)</option>
+                                <option value="traffic-simulation">Traffic Simulation ⚠️</option>
+                                <option value="osm-hospitals">OSM Hospital Search</option>
+                                <option value="maplibre-heatmap-sf">SF Incident Heatmap</option>
+                            </optgroup>
+                            <optgroup label="HERE Maps">
+                                <option value="here-routing">Multi-stop Routing</option>
+                                <option value="here-traffic">Traffic Incidents</option>
+                                <option value="here-isoline">Drive Time Isoline</option>
+                            </optgroup>
+                            <optgroup label="Cesium">
+                                <option value="cesium-globe">3D Globe</option>
+                                <option value="cesium-flight">Flight Tracker</option>
+                                <option value="cesium-terrain">Grand Canyon</option>
+                            </optgroup>
+                            <optgroup label="Turf.js">
+                                <option value="turf-buffer">Buffer Analysis</option>
+                                <option value="turf-voronoi">Voronoi Polygons</option>
+                                <option value="turf-isolines">Contour Lines</option>
+                            </optgroup>
+                            <optgroup label="MapLibre (FREE)">
+                                <option value="maplibre-3d">NYC 3D View</option>
+                                <option value="maplibre-geojson">Live Earthquake Feed</option>
+                                <option value="maplibre-heatmap">1000-Point Heatmap</option>
+                            </optgroup>
+                            <optgroup label="Deck.gl">
+                                <option value="deckgl-arcs">Flight Arcs</option>
+                                <option value="deckgl-hexagons">Hexagon Aggregation</option>
+                            </optgroup>
+                            <optgroup label="Live Data">
+                                <option value="earthquake-live">USGS Earthquakes</option>
+                            </optgroup>
+                        </select>
+                        <button onclick="executeCode()" style="background: var(--green-500); color: white; border: none; padding: 0.4rem 1rem; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 0.85rem;">
+                            ▶ Run
+                        </button>
+                    </div>
+                    <textarea id="codeEditor" spellcheck="false" style="flex: 1; background: transparent; border: none; color: #e5e7eb; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; padding: 1rem; resize: none; line-height: 1.5; outline: none;">// Select a demo from the dropdown above
+// or write your own code here
+
+const map = L.map('output-map').setView([38.9072, -77.0369], 11);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+}).addTo(map);
+
+L.marker([38.9072, -77.0369])
+    .addTo(map)
+    .bindPopup('<b>Washington, DC</b>')
+    .openPopup();</textarea>
+                </div>
+
+                <!-- Map Panel -->
+                <div style="background: white; border-radius: 12px; overflow: hidden; border: 1px solid var(--gray-200);">
+                    <div id="output-map" style="height: 100%; width: 100%;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MAP LIBRARIES TAB -->
+        <section id="libraries" class="tab-content">
+            <div class="section-header">
+                <h2>Map Libraries Comparison</h2>
+                <p>Different tools for different jobs. Know when to use what.</p>
+            </div>
+
+            <div class="library-grid">
+                <div class="library-card" onclick="selectLibrary('leaflet')">
+                    <div style="font-size: 48px;">🍃</div>
+                    <h4>Leaflet</h4>
+                    <p>Lightweight, mobile-friendly</p>
+                </div>
+                <div class="library-card" onclick="selectLibrary('mapbox')">
+                    <div style="font-size: 48px;">🗺️</div>
+                    <h4>Mapbox GL JS</h4>
+                    <p>Vector tiles, 3D, beautiful styles</p>
+                </div>
+                <div class="library-card" onclick="selectLibrary('arcgis')">
+                    <div style="font-size: 48px;">🌐</div>
+                    <h4>ArcGIS JS API</h4>
+                    <p>Enterprise features, analysis</p>
+                </div>
+                <div class="library-card" onclick="selectLibrary('openlayers')">
+                    <div style="font-size: 48px;">📐</div>
+                    <h4>OpenLayers</h4>
+                    <p>Full-featured, flexible</p>
+                </div>
+                <div class="library-card" onclick="selectLibrary('deck')">
+                    <div style="font-size: 48px;">🎴</div>
+                    <h4>Deck.gl</h4>
+                    <p>WebGL, large datasets</p>
+                </div>
+                <div class="library-card" onclick="selectLibrary('cesium')">
+                    <div style="font-size: 48px;">🌍</div>
+                    <h4>CesiumJS</h4>
+                    <p>3D globes, terrain</p>
+                </div>
+            </div>
+
+            <div class="tier" id="library-detail">
+                <div class="tier-header">
+                    <div class="tier-number">🍃</div>
+                    <div class="tier-title">
+                        <h3>Leaflet</h3>
+                        <p>The go-to for simple, fast web maps</p>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <h4 style="color: var(--green-500); margin-bottom: 1rem;">✅ Best For</h4>
+                        <ul style="color: var(--gray-600); padding-left: 1.5rem;">
+                            <li>Quick prototypes</li>
+                            <li>Mobile-first applications</li>
+                            <li>Simple marker maps</li>
+                            <li>Low bandwidth environments</li>
+                            <li>When bundle size matters (~40KB)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--red-primary); margin-bottom: 1rem;">⚠️ Limitations</h4>
+                        <ul style="color: var(--gray-600); padding-left: 1.5rem;">
+                            <li>No native vector tile support</li>
+                            <li>Limited 3D capabilities</li>
+                            <li>Performance drops with 10k+ markers</li>
+                            <li>No built-in analysis tools</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="code-block" style="margin-top: 1.5rem;">
+                    <div class="code-header">
+                        <span>Leaflet Quick Start</span>
+                        <button onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-javascript">// Include in HTML:
+// <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+// <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+const map = L.map('map').setView([38.9, -77.0], 10);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+}).addTo(map);
+
+// Add GeoJSON
+fetch('data.geojson')
+    .then(r => r.json())
+    .then(data => L.geoJSON(data).addTo(map));</code></pre>
+                </div>
+            </div>
+
+            <h3 style="margin: 2rem 0 1rem;">Comparison Table</h3>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; background: white; border-radius: 12px; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--gray-100);">
+                            <th style="padding: 1rem; text-align: left; border-bottom: 1px solid var(--gray-200);">Feature</th>
+                            <th style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200);">Leaflet</th>
+                            <th style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200);">Mapbox GL</th>
+                            <th style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200);">ArcGIS JS</th>
+                            <th style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200);">OpenLayers</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 1rem; border-bottom: 1px solid var(--gray-200);">Bundle Size</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200); color: var(--green-500);">~40KB</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200);">~250KB</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200); color: var(--red-primary);">~1MB+</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200);">~300KB</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 1rem; border-bottom: 1px solid var(--gray-200);">Vector Tiles</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200);">Plugin</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200); color: var(--green-500);">Native</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200); color: var(--green-500);">Native</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200); color: var(--green-500);">Native</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 1rem; border-bottom: 1px solid var(--gray-200);">3D Support</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200);">❌</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200);">✅</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200); color: var(--green-500);">✅ Full</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200);">Limited</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 1rem; border-bottom: 1px solid var(--gray-200);">Learning Curve</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200); color: var(--green-500);">Easy</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200);">Medium</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200); color: var(--red-primary);">Steep</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200);">Medium</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 1rem; border-bottom: 1px solid var(--gray-200);">Free to Use</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200); color: var(--green-500);">✅ OSS</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200);">Freemium</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200);">AGOL Req</td>
+                            <td style="padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200); color: var(--green-500);">✅ OSS</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- EXTERNAL APIS TAB -->
+        <section id="apis" class="tab-content">
+            <div class="section-header">
+                <h2>External APIs</h2>
+                <p>Data sources to supercharge your maps. Free, public, powerful.</p>
+            </div>
+
+            <div class="api-section">
+                <div class="api-header" onclick="toggleApi(this)">
+                    <h4><span class="api-method get">GET</span> Census Bureau API</h4>
+                    <span>▼</span>
+                </div>
+                <div class="api-body">
+                    <p style="margin-bottom: 1rem;">Demographics, boundaries, American Community Survey data.</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>Python - Get County Population</span>
+                            <button onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-python">import requests
+
+# Census API - No key required for basic access
+url = "https://api.census.gov/data/2022/acs/acs5"
+params = {
+    "get": "NAME,B01003_001E",  # Total population
+    "for": "county:*",
+    "in": "state:06"  # California
+}
+
+response = requests.get(url, params=params)
+data = response.json()
+
+# data[0] is headers, data[1:] is rows
+for row in data[1:5]:
+    print(f"{row[0]}: {int(row[1]):,} people")</code></pre>
+                    </div>
+                    <p style="margin-top: 1rem; color: var(--gray-500); font-size: 0.9rem;">
+                        <strong>Base URL:</strong> https://api.census.gov/data/<br>
+                        <strong>Auth:</strong> API key (free) for higher limits<br>
+                        <strong>Docs:</strong> <a href="https://www.census.gov/data/developers/data-sets.html" target="_blank">census.gov/developers</a>
+                    </p>
+                </div>
+            </div>
+
+            <div class="api-section">
+                <div class="api-header" onclick="toggleApi(this)">
+                    <h4><span class="api-method get">GET</span> FEMA Disaster Declarations</h4>
+                    <span>▼</span>
+                </div>
+                <div class="api-body">
+                    <p style="margin-bottom: 1rem;">Real-time disaster declarations, assistance data, NFIP claims.</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>Python - Recent Disasters</span>
+                            <button onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-python">import requests
+
+url = "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries"
+params = {
+    "$filter": "fyDeclared eq 2024",
+    "$orderby": "declarationDate desc",
+    "$top": 10
+}
+
+response = requests.get(url, params=params)
+disasters = response.json()["DisasterDeclarationsSummaries"]
+
+for d in disasters:
+    print(f"{d['declarationDate'][:10]} | {d['state']} | {d['incidentType']}")</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-section">
+                <div class="api-header" onclick="toggleApi(this)">
+                    <h4><span class="api-method get">GET</span> NOAA Weather</h4>
+                    <span>▼</span>
+                </div>
+                <div class="api-body">
+                    <p style="margin-bottom: 1rem;">Forecasts, alerts, historical data, radar imagery.</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>Python - Active Weather Alerts</span>
+                            <button onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-python">import requests
+
+# NOAA Weather API - Free, no key required
+url = "https://api.weather.gov/alerts/active"
+params = {"area": "CA"}  # California
+
+response = requests.get(url, headers={"User-Agent": "MyApp"})
+alerts = response.json()["features"]
+
+for alert in alerts[:5]:
+    props = alert["properties"]
+    print(f"{props['event']} - {props['headline']}")</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-section">
+                <div class="api-header" onclick="toggleApi(this)">
+                    <h4><span class="api-method get">GET</span> OpenStreetMap / Overpass</h4>
+                    <span>▼</span>
+                </div>
+                <div class="api-body">
+                    <p style="margin-bottom: 1rem;">Query OSM data - roads, buildings, POIs, boundaries.</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>Python - Find Hospitals in Area</span>
+                            <button onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-python">import requests
+
+overpass_url = "http://overpass-api.de/api/interpreter"
+query = """
+[out:json];
+area["name"="San Francisco"]->.a;
+(
+  node["amenity"="hospital"](area.a);
+  way["amenity"="hospital"](area.a);
+);
+out center;
+"""
+
+response = requests.post(overpass_url, data={"data": query})
+hospitals = response.json()["elements"]
+
+for h in hospitals:
+    name = h.get("tags", {}).get("name", "Unknown")
+    print(f"🏥 {name}")</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-section">
+                <div class="api-header" onclick="toggleApi(this)">
+                    <h4><span class="api-method get">GET</span> USGS Earthquake API</h4>
+                    <span>▼</span>
+                </div>
+                <div class="api-body">
+                    <p style="margin-bottom: 1rem;">Real-time earthquake data, GeoJSON format, multiple time ranges.</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>JavaScript - Live Earthquake Map</span>
+                            <button onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-javascript">// Fetch earthquakes from past day
+fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson')
+    .then(r => r.json())
+    .then(data => {
+        L.geoJSON(data, {
+            pointToLayer: (feature, latlng) => {
+                const mag = feature.properties.mag;
+                return L.circleMarker(latlng, {
+                    radius: mag * 3,
+                    fillColor: mag > 4 ? '#d32f2f' : '#ff9800',
+                    fillOpacity: 0.7,
+                    stroke: false
+                });
+            }
+        }).addTo(map);
+    });</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI INTEGRATION TAB -->
+        <section id="ai" class="tab-content">
+            <div class="section-header">
+                <h2>AI Integration</h2>
+                <p>The future is here. Natural language to map operations.</p>
+            </div>
+
+            <div class="tier">
+                <div class="tier-header">
+                    <div class="tier-number">🤖</div>
+                    <div class="tier-title">
+                        <h3>What AI Can Do for GIS</h3>
+                        <p>Beyond "show me a map"</p>
+                    </div>
+                </div>
+
+                <div class="card-grid">
+                    <div class="card">
+                        <div class="card-icon purple">💬</div>
+                        <h3>Natural Language Queries</h3>
+                        <p>"Show me all shelters within 10 miles of the wildfire perimeter that have capacity over 100"</p>
+                        <div class="card-tags">
+                            <span class="tag ai">Claude</span>
+                            <span class="tag python">Python</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon purple">🏷️</div>
+                        <h3>Auto Content Tagging</h3>
+                        <p>AI reads layer descriptions, suggests tags, improves searchability</p>
+                        <div class="card-tags">
+                            <span class="tag ai">LLM</span>
+                            <span class="tag api">Metadata</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon purple">📝</div>
+                        <h3>Report Generation</h3>
+                        <p>Feed map data to AI, get formatted situation reports, executive summaries</p>
+                        <div class="card-tags">
+                            <span class="tag ai">Claude</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon purple">🔍</div>
+                        <h3>Anomaly Detection</h3>
+                        <p>AI identifies unusual patterns - sudden population changes, data outliers</p>
+                        <div class="card-tags">
+                            <span class="tag ai">ML</span>
+                            <span class="tag python">Python</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-block" style="margin: 2rem 0;">
+                <div class="code-header">
+                    <span>Example: AI-Powered GIS Query</span>
+                    <button onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-python">import anthropic
+from arcgis.gis import GIS
+from arcgis.features import FeatureLayer
+
+client = anthropic.Anthropic()
+gis = GIS(profile="redcross")
+
+def natural_language_query(question):
+    """Convert natural language to ArcGIS query"""
+
+    # Ask Claude to generate the query
+    response = client.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=500,
+        system="""You are a GIS query generator. Convert natural language
+        to ArcGIS SQL where clauses. Return ONLY the where clause, no explanation.
+        Available fields: COUNTY, STATE, POPULATION, SHELTER_CAPACITY, STATUS""",
+        messages=[{"role": "user", "content": question}]
+    )
+
+    where_clause = response.content[0].text.strip()
+    print(f"Generated query: {where_clause}")
+
+    # Execute on feature layer
+    fl = FeatureLayer("https://services.arcgis.com/.../FeatureServer/0")
+    results = fl.query(where=where_clause)
+
+    return results.features
+
+# Usage
+shelters = natural_language_query(
+    "Find open shelters in California with capacity over 200"
+)
+# Generated: STATUS = 'Open' AND STATE = 'CA' AND SHELTER_CAPACITY > 200</code></pre>
+            </div>
+
+            <div class="tier">
+                <div class="tier-header">
+                    <div class="tier-number">🔮</div>
+                    <div class="tier-title">
+                        <h3>Future Explorations</h3>
+                        <p>Where we're heading</p>
+                    </div>
+                </div>
+                <div class="capabilities">
+                    <div class="capability">
+                        <span class="capability-icon">🖼️</span>
+                        <div>
+                            <h4>Image Analysis</h4>
+                            <p>AI analyzes satellite imagery for damage assessment</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">📊</span>
+                        <div>
+                            <h4>Predictive Modeling</h4>
+                            <p>Forecast shelter needs based on disaster trajectory</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">🗣️</span>
+                        <div>
+                            <h4>Voice Commands</h4>
+                            <p>"Hey Claude, zoom to the LA fires and show evacuations"</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">📋</span>
+                        <div>
+                            <h4>Automated QA</h4>
+                            <p>AI reviews maps for errors, accessibility, completeness</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ROADMAP TAB -->
+        <section id="roadmap" class="tab-content">
+            <div class="section-header">
+                <h2>Roadmap</h2>
+                <p>Where we're going. What we're building next.</p>
+            </div>
+
+            <div class="tier">
+                <div class="tier-header">
+                    <div class="tier-number" style="background: var(--green-500);">✓</div>
+                    <div class="tier-title">
+                        <h3>Completed</h3>
+                        <p>Foundation laid</p>
+                    </div>
+                </div>
+                <div class="capabilities">
+                    <div class="capability" style="background: #dcfce7;">
+                        <span class="capability-icon">✅</span>
+                        <div>
+                            <h4>OAuth2 Authentication</h4>
+                            <p>Profile caching, secure connections</p>
+                        </div>
+                    </div>
+                    <div class="capability" style="background: #dcfce7;">
+                        <span class="capability-icon">✅</span>
+                        <div>
+                            <h4>Dependency Mapper</h4>
+                            <p>Know what breaks before deleting</p>
+                        </div>
+                    </div>
+                    <div class="capability" style="background: #dcfce7;">
+                        <span class="capability-icon">✅</span>
+                        <div>
+                            <h4>Orphan Content Finder</h4>
+                            <p>Identified cleanup candidates</p>
+                        </div>
+                    </div>
+                    <div class="capability" style="background: #dcfce7;">
+                        <span class="capability-icon">✅</span>
+                        <div>
+                            <h4>Open Laboratory</h4>
+                            <p>This documentation site</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tier">
+                <div class="tier-header">
+                    <div class="tier-number" style="background: var(--amber-500);">→</div>
+                    <div class="tier-title">
+                        <h3>In Progress</h3>
+                        <p>Currently building</p>
+                    </div>
+                </div>
+                <div class="capabilities">
+                    <div class="capability" style="background: #fef3c7;">
+                        <span class="capability-icon">🔄</span>
+                        <div>
+                            <h4>Heat Map Animation</h4>
+                            <p>Temporal visualization system</p>
+                        </div>
+                    </div>
+                    <div class="capability" style="background: #fef3c7;">
+                        <span class="capability-icon">🔄</span>
+                        <div>
+                            <h4>FEMA Data Sync</h4>
+                            <p>Automated disaster data pipeline</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tier">
+                <div class="tier-header">
+                    <div class="tier-number" style="background: var(--blue-500);">◯</div>
+                    <div class="tier-title">
+                        <h3>Planned</h3>
+                        <p>On the horizon</p>
+                    </div>
+                </div>
+                <div class="capabilities">
+                    <div class="capability">
+                        <span class="capability-icon">📋</span>
+                        <div>
+                            <h4>Content Lifecycle Manager</h4>
+                            <p>Find stale content, generate inventories</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">🚀</span>
+                        <div>
+                            <h4>Incident Deployment System</h4>
+                            <p>One-command disaster map setup</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">📊</span>
+                        <div>
+                            <h4>Dashboard Generator</h4>
+                            <p>Template-based dashboard creation</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">🤖</span>
+                        <div>
+                            <h4>AI Query Interface</h4>
+                            <p>Natural language GIS operations</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">📡</span>
+                        <div>
+                            <h4>Webhook Listeners</h4>
+                            <p>Real-time triggers and automation</p>
+                        </div>
+                    </div>
+                    <div class="capability">
+                        <span class="capability-icon">📱</span>
+                        <div>
+                            <h4>Mobile Field Tools</h4>
+                            <p>Offline-first data collection</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: var(--gray-100); border-radius: 12px; padding: 2rem; margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Want to Contribute an Idea?</h3>
+                <p style="color: var(--gray-600); margin-bottom: 1rem;">This lab grows with your needs. Add capabilities as you discover them.</p>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>Add a new example</span>
+                    </div>
+                    <pre><code class="language-javascript">// In the EXAMPLES object, add:
+EXAMPLES['your-example'] = {
+    name: 'Your Example Name',
+    library: 'leaflet|mapbox|arcgis',
+    code: `// Your code here`
+};</code></pre>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div>
+                <strong>GIS Open Laboratory</strong> | Built for Dragon (Jeff Franzen)<br>
+                <span style="font-size: 0.85rem;">American Red Cross • GIS Developer</span>
+            </div>
+            <div>
+                <a href="https://developers.arcgis.com/" target="_blank">ArcGIS Developers</a> •
+                <a href="https://leafletjs.com/" target="_blank">Leaflet</a> •
+                <a href="https://docs.mapbox.com/" target="_blank">Mapbox</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Tab Navigation
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+
+                // Auto-run first demo when switching to playground
+                if (tab.dataset.tab === 'playground') {
+                    setTimeout(() => {
+                        const mapContainer = document.getElementById('output-map');
+                        if (mapContainer && !mapContainer.hasChildNodes()) {
+                            executeCode();
+                        }
+                    }, 100);
+                }
+            });
+        });
+
+        // Code Highlighting
+        hljs.highlightAll();
+
+        // Copy Code
+        function copyCode(btn) {
+            const code = btn.closest('.code-block').querySelector('code').textContent;
+            navigator.clipboard.writeText(code);
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = 'Copy', 2000);
+        }
+
+        // API Toggle
+        function toggleApi(header) {
+            const body = header.nextElementSibling;
+            body.classList.toggle('open');
+            header.querySelector('span:last-child').textContent = body.classList.contains('open') ? '▲' : '▼';
+        }
+
+        // Library detail switcher
+        function selectLibrary(lib) {
+            document.querySelectorAll('.library-card').forEach(c => c.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+        }
+
+        // ========== SIMPLE PLAYGROUND ==========
+
+        window.activeMap = null;
+
+        const DEMOS = {
+            // ===== LEAFLET POWER DEMOS =====
+            'leaflet-realtime': {
+                label: 'leaflet-realtime.js',
+                code: `// Leaflet: Real-time Vehicle Tracking Simulation
+const map = L.map('output-map').setView([38.9, -77.03], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+// Create 5 "vehicles" with custom icons
+const vehicles = [];
+const colors = ['#d32f2f', '#1e40af', '#166534', '#7c3aed', '#ea580c'];
+
+for (let i = 0; i < 5; i++) {
+    const icon = L.divIcon({
+        className: 'vehicle',
+        html: '<div style="background:'+colors[i]+';width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>',
+        iconSize: [20, 20]
+    });
+    vehicles.push({
+        marker: L.marker([38.9 + (Math.random()-0.5)*0.02, -77.03 + (Math.random()-0.5)*0.03], {icon}).addTo(map),
+        dx: (Math.random() - 0.5) * 0.001,
+        dy: (Math.random() - 0.5) * 0.001
+    });
+}
+
+// Animate vehicles
+setInterval(() => {
+    vehicles.forEach(v => {
+        const pos = v.marker.getLatLng();
+        v.marker.setLatLng([pos.lat + v.dy, pos.lng + v.dx]);
+        // Bounce off edges
+        if (pos.lat > 38.92 || pos.lat < 38.88) v.dy *= -1;
+        if (pos.lng > -77.0 || pos.lng < -77.06) v.dx *= -1;
+    });
+}, 100);
+
+L.control.scale().addTo(map);`
+            },
+
+            'leaflet-draw': {
+                label: 'leaflet-draw.js',
+                code: `// Leaflet: Interactive Drawing (click map to draw)
+const map = L.map('output-map').setView([38.9, -77.03], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+const drawnItems = L.featureGroup().addTo(map);
+let drawing = false;
+let currentLine = null;
+let points = [];
+
+// Instructions
+const info = L.control({position: 'topright'});
+info.onAdd = () => {
+    const div = L.DomUtil.create('div');
+    div.innerHTML = '<div style="background:white;padding:12px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.2);"><b>Click to draw points</b><br>Double-click to finish</div>';
+    return div;
+};
+info.addTo(map);
+
+map.on('click', e => {
+    points.push([e.latlng.lat, e.latlng.lng]);
+    L.circleMarker(e.latlng, {radius: 6, fillColor: '#d32f2f', fillOpacity: 1, color: 'white', weight: 2}).addTo(drawnItems);
+    if (points.length > 1) {
+        if (currentLine) map.removeLayer(currentLine);
+        currentLine = L.polyline(points, {color: '#d32f2f', weight: 3}).addTo(drawnItems);
+    }
+});
+
+map.on('dblclick', e => {
+    if (points.length > 2) {
+        L.polygon(points, {color: '#d32f2f', fillOpacity: 0.3}).addTo(drawnItems);
+    }
+    points = [];
+    currentLine = null;
+});`
+            },
+
+            'leaflet-cluster': {
+                label: 'leaflet-cluster.js',
+                code: `// Leaflet: 500 Markers with Smart Clustering
+const map = L.map('output-map').setView([38.9, -77.03], 11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+// Generate 500 random shelter locations
+const shelters = [];
+for (let i = 0; i < 500; i++) {
+    shelters.push({
+        lat: 38.9 + (Math.random() - 0.5) * 0.15,
+        lng: -77.03 + (Math.random() - 0.5) * 0.2,
+        name: 'Shelter ' + (i + 1),
+        capacity: Math.floor(Math.random() * 200) + 50
+    });
+}
+
+// Color by capacity
+shelters.forEach(s => {
+    const color = s.capacity > 150 ? '#d32f2f' : s.capacity > 100 ? '#f59e0b' : '#22c55e';
+    L.circleMarker([s.lat, s.lng], {
+        radius: 6,
+        fillColor: color,
+        fillOpacity: 0.8,
+        color: 'white',
+        weight: 1
+    }).addTo(map).bindPopup('<b>' + s.name + '</b><br>Capacity: ' + s.capacity);
+});
+
+// Legend
+const legend = L.control({position: 'bottomright'});
+legend.onAdd = () => {
+    const div = L.DomUtil.create('div');
+    div.innerHTML = '<div style="background:white;padding:10px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.2);font-size:12px;"><b>500 Shelters</b><br><span style="color:#22c55e">●</span> <100<br><span style="color:#f59e0b">●</span> 100-150<br><span style="color:#d32f2f">●</span> >150</div>';
+    return div;
+};
+legend.addTo(map);`
+            },
+
+            // ===== MAPBOX POWER DEMOS =====
+            'mapbox-3d-terrain': {
+                label: 'mapbox-terrain.js',
+                code: `// Mapbox: 3D Terrain + Fog + Sky (Yosemite National Park)
+mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+
+const map = new mapboxgl.Map({
+    container: 'output-map',
+    style: 'mapbox://styles/mapbox/satellite-streets-v12',
+    center: [-119.5383, 37.8651], // Half Dome area
+    zoom: 13,
+    pitch: 75,
+    bearing: -20
+});
+
+map.on('load', () => {
+    map.addSource('mapbox-dem', {
+        type: 'raster-dem',
+        url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+        tileSize: 512
+    });
+    map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
+
+    map.setFog({
+        color: 'rgb(186, 210, 235)',
+        'high-color': 'rgb(36, 92, 223)',
+        'horizon-blend': 0.02,
+        'space-color': 'rgb(11, 11, 25)',
+        'star-intensity': 0.6
+    });
+
+    // Add info panel
+    const info = document.createElement('div');
+    info.innerHTML = '<div style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.75);color:white;padding:12px;border-radius:8px;font-size:12px;z-index:1000;max-width:200px;"><b style="font-size:14px;">Yosemite National Park</b><br><br>📍 Half Dome Area<br>🏔️ Elevation: ~2,700m<br>📐 Exaggeration: 1.5x<br><br><i style="color:#9ca3af;">Drag to rotate • Scroll to zoom</i></div>';
+    document.getElementById('output-map').appendChild(info);
+});
+
+map.addControl(new mapboxgl.NavigationControl());`
+            },
+
+            'mapbox-animate': {
+                label: 'mapbox-animate.js',
+                code: `// Mapbox: Animated Flight Path (DC → LA)
+mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+
+const map = new mapboxgl.Map({
+    container: 'output-map',
+    style: 'mapbox://styles/mapbox/dark-v11',
+    center: [-96, 37.8],
+    zoom: 3
+});
+
+// Flight path: DC to LA with waypoints
+const route = [
+    { coords: [-77.0369, 38.9072], city: 'Washington DC', code: 'DCA' },
+    { coords: [-87.6298, 41.8781], city: 'Chicago', code: 'ORD' },
+    { coords: [-104.9903, 39.7392], city: 'Denver', code: 'DEN' },
+    { coords: [-118.2437, 34.0522], city: 'Los Angeles', code: 'LAX' }
+];
+
+const routeCoords = route.map(r => r.coords);
+
+map.on('load', () => {
+    map.addSource('route', {
+        type: 'geojson',
+        data: { type: 'Feature', geometry: { type: 'LineString', coordinates: routeCoords }}
+    });
+
+    map.addLayer({
+        id: 'route',
+        type: 'line',
+        source: 'route',
+        paint: {
+            'line-color': '#d32f2f',
+            'line-width': 3,
+            'line-dasharray': [2, 2]
+        }
+    });
+
+    // Add city markers
+    route.forEach((r, idx) => {
+        new mapboxgl.Marker({ color: idx === 0 ? '#22c55e' : idx === route.length - 1 ? '#3b82f6' : '#f59e0b' })
+            .setLngLat(r.coords)
+            .setPopup(new mapboxgl.Popup().setHTML('<b>' + r.city + '</b><br>' + r.code))
+            .addTo(map);
+    });
+
+    // Animated point
+    let i = 0;
+    const point = { type: 'Feature', geometry: { type: 'Point', coordinates: routeCoords[0] }};
+    map.addSource('point', { type: 'geojson', data: point });
+    map.addLayer({
+        id: 'point',
+        type: 'circle',
+        source: 'point',
+        paint: { 'circle-radius': 12, 'circle-color': '#d32f2f', 'circle-stroke-width': 3, 'circle-stroke-color': 'white' }
+    });
+
+    // Info panel
+    const info = document.createElement('div');
+    info.innerHTML = '<div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.85);color:white;padding:12px;border-radius:8px;font-size:12px;z-index:1000;"><b>Cross-Country Flight</b><br><br><span style="color:#22c55e">●</span> DCA (Start)<br><span style="color:#f59e0b">●</span> Waypoints<br><span style="color:#3b82f6">●</span> LAX (End)<br><br><small style="color:#9ca3af;">Animation: 1s per waypoint<br>~2,300 miles total</small></div>';
+    document.getElementById('output-map').appendChild(info);
+
+    function animate() {
+        i = (i + 1) % routeCoords.length;
+        point.geometry.coordinates = routeCoords[i];
+        map.getSource('point').setData(point);
+        setTimeout(animate, 1000);
+    }
+    animate();
+});`
+            },
+
+            'mapbox-heatmap': {
+                label: 'mapbox-heatmap.js',
+                code: `// Mapbox: Earthquake Heatmap (live USGS 7-day data)
+mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+
+const map = new mapboxgl.Map({
+    container: 'output-map',
+    style: 'mapbox://styles/mapbox/dark-v11',
+    center: [-120, 37],
+    zoom: 4
+});
+
+map.on('load', async () => {
+    const resp = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson');
+    const data = await resp.json();
+
+    map.addSource('earthquakes', { type: 'geojson', data });
+
+    map.addLayer({
+        id: 'heat',
+        type: 'heatmap',
+        source: 'earthquakes',
+        paint: {
+            'heatmap-weight': ['interpolate', ['linear'], ['get', 'mag'], 0, 0, 6, 1],
+            'heatmap-intensity': 1,
+            'heatmap-color': [
+                'interpolate', ['linear'], ['heatmap-density'],
+                0, 'rgba(0,0,0,0)',
+                0.2, '#fef3c7',
+                0.4, '#fcd34d',
+                0.6, '#f97316',
+                0.8, '#dc2626',
+                1, '#7f1d1d'
+            ],
+            'heatmap-radius': 20
+        }
+    });
+
+    // Add legend with live count
+    const legend = document.createElement('div');
+    legend.innerHTML = '<div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.85);color:white;padding:12px;border-radius:8px;font-size:11px;z-index:1000;"><b>USGS Earthquakes</b><br>Past 7 Days<br><br><b style="font-size:16px;color:#fcd34d;">' + data.features.length + '</b> events<br><br><div style="display:flex;align-items:center;gap:6px;margin:8px 0;"><div style="width:60px;height:10px;background:linear-gradient(to right,#fef3c7,#fcd34d,#f97316,#dc2626,#7f1d1d);border-radius:2px;"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;width:60px;"><span>Low</span><span>High</span></div><br><small style="color:#9ca3af;">Density = earthquake frequency<br>Data: earthquake.usgs.gov</small></div>';
+    document.getElementById('output-map').appendChild(legend);
+});
+
+map.addControl(new mapboxgl.NavigationControl());`
+            },
+
+            // ===== ARCGIS REST API DEMOS (No AMD required) =====
+            'arcgis-query': {
+                label: 'arcgis-rest-query.js',
+                code: `// ArcGIS: Query REST API directly (no SDK needed!)
+const map = L.map('output-map').setView([38, -98], 4);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+// Query ArcGIS REST API directly for counties
+const serviceUrl = 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Counties/FeatureServer/0/query';
+
+// Query for California counties
+fetch(serviceUrl + '?' + new URLSearchParams({
+    where: "STATE_NAME = 'California'",
+    outFields: 'NAME,POP_2020',
+    f: 'geojson'
+}))
+.then(r => r.json())
+.then(data => {
+    L.geoJSON(data, {
+        style: f => ({
+            fillColor: f.properties.POP_2020 > 1000000 ? '#dc2626' :
+                       f.properties.POP_2020 > 500000 ? '#f97316' :
+                       f.properties.POP_2020 > 100000 ? '#eab308' : '#22c55e',
+            fillOpacity: 0.5,
+            color: '#333',
+            weight: 1
+        }),
+        onEachFeature: (f, layer) => {
+            layer.bindPopup('<b>' + f.properties.NAME + '</b><br>Pop: ' + (f.properties.POP_2020 || 'N/A').toLocaleString());
+        }
+    }).addTo(map);
+    map.setView([37, -120], 6);
+});
+
+const legend = L.control({position: 'topright'});
+legend.onAdd = () => {
+    const div = L.DomUtil.create('div');
+    div.innerHTML = '<div style="background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);"><b>CA Counties by Pop</b><br><span style="color:#dc2626">●</span> >1M<br><span style="color:#f97316">●</span> 500K-1M<br><span style="color:#eab308">●</span> 100K-500K<br><span style="color:#22c55e">●</span> <100K</div>';
+    return div;
+};
+legend.addTo(map);`
+            },
+
+            'arcgis-sketch': {
+                label: 'arcgis-geocode.js',
+                code: `// ArcGIS: Geocoding REST API (free tier!)
+const map = L.map('output-map').setView([38.9, -77.03], 12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+// ArcGIS Geocoding endpoint (no API key needed for basic use)
+const geocodeUrl = 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates';
+
+// Search for landmarks in DC
+const landmarks = ['White House, Washington DC', 'Lincoln Memorial, DC', 'Capitol Building, DC', 'Smithsonian, DC'];
+const markers = L.featureGroup().addTo(map);
+
+landmarks.forEach(async (address, i) => {
+    const resp = await fetch(geocodeUrl + '?' + new URLSearchParams({
+        singleLine: address,
+        f: 'json',
+        maxLocations: 1
+    }));
+    const data = await resp.json();
+    if (data.candidates && data.candidates.length) {
+        const loc = data.candidates[0].location;
+        const icon = L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="background:#d32f2f;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">' + (i+1) + '</div>',
+            iconSize: [24, 24]
+        });
+        L.marker([loc.y, loc.x], {icon}).addTo(markers)
+            .bindPopup('<b>' + address + '</b><br>Score: ' + data.candidates[0].score);
+    }
+});
+
+setTimeout(() => map.fitBounds(markers.getBounds().pad(0.1)), 1500);
+
+const info = L.control({position: 'topright'});
+info.onAdd = () => {
+    const div = L.DomUtil.create('div');
+    div.innerHTML = '<div style="background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);"><b>ArcGIS Geocoding</b><br>Free REST API<br>No key required!</div>';
+    return div;
+};
+info.addTo(map);`
+            },
+
+            'arcgis-scene': {
+                label: 'arcgis-routing.js',
+                code: `// ArcGIS: Feature Layer Query (GeoJSON output)
+const map = L.map('output-map').setView([40.7, -74], 10);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Esri World Imagery'
+}).addTo(map);
+
+// Query NYC subway stations from ArcGIS Hub
+const subwayUrl = 'https://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/NYC_Subway_Entrances/FeatureServer/0/query';
+
+fetch(subwayUrl + '?' + new URLSearchParams({
+    where: '1=1',
+    outFields: 'NAME,LINE',
+    f: 'geojson',
+    resultRecordCount: 200
+}))
+.then(r => r.json())
+.then(data => {
+    // Color by subway line
+    const lineColors = {
+        '1': '#ee352e', '2': '#ee352e', '3': '#ee352e',
+        '4': '#00933c', '5': '#00933c', '6': '#00933c',
+        'A': '#0039a6', 'C': '#0039a6', 'E': '#0039a6',
+        'B': '#ff6319', 'D': '#ff6319', 'F': '#ff6319', 'M': '#ff6319',
+        'N': '#fccc0a', 'Q': '#fccc0a', 'R': '#fccc0a', 'W': '#fccc0a',
+        'L': '#a7a9ac', '7': '#b933ad', 'G': '#6cbe45'
+    };
+
+    L.geoJSON(data, {
+        pointToLayer: (f, latlng) => {
+            const line = (f.properties.LINE || '').charAt(0);
+            return L.circleMarker(latlng, {
+                radius: 5,
+                fillColor: lineColors[line] || '#666',
+                fillOpacity: 0.8,
+                color: 'white',
+                weight: 1
+            });
+        },
+        onEachFeature: (f, layer) => {
+            layer.bindPopup('<b>' + f.properties.NAME + '</b><br>Lines: ' + f.properties.LINE);
+        }
+    }).addTo(map);
+});
+
+const legend = L.control({position: 'bottomright'});
+legend.onAdd = () => {
+    const div = L.DomUtil.create('div');
+    div.innerHTML = '<div style="background:rgba(0,0,0,0.7);color:white;padding:10px;border-radius:6px;font-size:11px;"><b>NYC Subway</b><br>200 stations via<br>ArcGIS REST API</div>';
+    return div;
+};
+legend.addTo(map);`
+            },
+
+            // ===== MORE PLATFORMS =====
+            'maplibre-3d': {
+                label: 'maplibre-3d.js',
+                code: `// MapLibre: 3D View of NYC (FREE - no token!)
+const map = new maplibregl.Map({
+    container: 'output-map',
+    style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+    center: [-74.006, 40.7128],
+    zoom: 15,
+    pitch: 60,
+    bearing: -20
+});
+
+// Add NYC landmarks
+const landmarks = [
+    { coords: [-74.006, 40.7128], name: 'City Hall', color: '#d32f2f' },
+    { coords: [-74.0134, 40.7127], name: 'World Trade Center', color: '#1e40af' },
+    { coords: [-74.0445, 40.6892], name: 'Statue of Liberty', color: '#166534' },
+    { coords: [-73.9857, 40.7484], name: 'Empire State Building', color: '#7c3aed' }
+];
+
+landmarks.forEach(lm => {
+    new maplibregl.Marker({color: lm.color})
+        .setLngLat(lm.coords)
+        .setPopup(new maplibregl.Popup().setHTML('<b>' + lm.name + '</b>'))
+        .addTo(map);
+});
+
+map.addControl(new maplibregl.NavigationControl());
+
+// Add legend
+map.on('load', () => {
+    const legend = document.createElement('div');
+    legend.innerHTML = '<div style="position:absolute;top:10px;right:10px;background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);font-size:12px;z-index:1000;"><b>NYC 3D View</b><br><br><span style="color:#d32f2f">●</span> City Hall<br><span style="color:#1e40af">●</span> WTC<br><span style="color:#166534">●</span> Statue of Liberty<br><span style="color:#7c3aed">●</span> Empire State<br><br><i style="color:#666;">Drag to rotate view</i></div>';
+    document.getElementById('output-map').appendChild(legend);
+});`
+            },
+
+            'maplibre-geojson': {
+                label: 'maplibre-geojson.js',
+                code: `// MapLibre: Live GeoJSON Data (USGS Earthquakes)
+const map = new maplibregl.Map({
+    container: 'output-map',
+    style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+    center: [-120, 37],
+    zoom: 5
+});
+
+map.on('load', async () => {
+    // Load live earthquake data
+    const resp = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson');
+    const data = await resp.json();
+
+    map.addSource('earthquakes', { type: 'geojson', data });
+
+    // Circles sized by magnitude
+    map.addLayer({
+        id: 'quake-circles',
+        type: 'circle',
+        source: 'earthquakes',
+        paint: {
+            'circle-radius': ['interpolate', ['linear'], ['get', 'mag'], 1, 3, 5, 15, 7, 30],
+            'circle-color': ['interpolate', ['linear'], ['get', 'mag'],
+                1, '#22c55e', 3, '#eab308', 5, '#f97316', 7, '#dc2626'],
+            'circle-opacity': 0.7,
+            'circle-stroke-width': 1,
+            'circle-stroke-color': 'white'
+        }
+    });
+
+    // Click to show details
+    map.on('click', 'quake-circles', e => {
+        const props = e.features[0].properties;
+        new maplibregl.Popup()
+            .setLngLat(e.lngLat)
+            .setHTML('<b>M' + props.mag.toFixed(1) + '</b><br>' + props.place)
+            .addTo(map);
+    });
+    map.on('mouseenter', 'quake-circles', () => map.getCanvas().style.cursor = 'pointer');
+    map.on('mouseleave', 'quake-circles', () => map.getCanvas().style.cursor = '');
+});
+
+map.addControl(new maplibregl.NavigationControl());`
+            },
+
+            'maplibre-heatmap': {
+                label: 'maplibre-heatmap.js',
+                code: `// MapLibre: Heatmap Layer (FREE!)
+const map = new maplibregl.Map({
+    container: 'output-map',
+    style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+    center: [-122.4, 37.8],
+    zoom: 11
+});
+
+map.on('load', () => {
+    // Generate 1000 random points around San Francisco
+    const points = [];
+    for (let i = 0; i < 1000; i++) {
+        points.push({
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: [
+                    -122.4 + (Math.random() - 0.5) * 0.15,
+                    37.8 + (Math.random() - 0.5) * 0.1
+                ]
+            },
+            properties: { mag: Math.random() * 5 }
+        });
+    }
+
+    map.addSource('points', {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: points }
+    });
+
+    map.addLayer({
+        id: 'heatmap',
+        type: 'heatmap',
+        source: 'points',
+        paint: {
+            'heatmap-weight': ['get', 'mag'],
+            'heatmap-intensity': 1,
+            'heatmap-color': [
+                'interpolate', ['linear'], ['heatmap-density'],
+                0, 'rgba(0,0,0,0)',
+                0.2, '#3b82f6',
+                0.4, '#22c55e',
+                0.6, '#eab308',
+                0.8, '#f97316',
+                1, '#dc2626'
+            ],
+            'heatmap-radius': 25
+        }
+    });
+});
+
+map.addControl(new maplibregl.NavigationControl());`
+            },
+
+            'deckgl-arcs': {
+                label: 'deckgl-arcs.js',
+                code: `// Deck.gl: Red Cross Disaster Response Routes
+// Visualizing supply chain from regional warehouses to disaster zones
+const {DeckGL, ArcLayer, ScatterplotLayer} = deck;
+
+// Red Cross Regional Hubs
+const hubs = [
+    { pos: [-77.0, 38.9], name: 'DC National HQ', type: 'hq' },
+    { pos: [-84.4, 33.7], name: 'Atlanta Hub', type: 'hub' },
+    { pos: [-95.4, 29.8], name: 'Houston Hub', type: 'hub' },
+    { pos: [-87.6, 41.9], name: 'Chicago Hub', type: 'hub' },
+    { pos: [-118.2, 34.0], name: 'LA Hub', type: 'hub' },
+];
+
+// Disaster response routes (hub → affected area)
+const routes = [
+    { source: [-77.0, 38.9], target: [-81.5, 28.5], name: 'DC → Florida (Hurricane)', flow: 500 },
+    { source: [-84.4, 33.7], target: [-81.5, 28.5], name: 'Atlanta → Florida', flow: 350 },
+    { source: [-95.4, 29.8], target: [-90.1, 29.9], name: 'Houston → New Orleans', flow: 400 },
+    { source: [-95.4, 29.8], target: [-97.7, 30.3], name: 'Houston → Austin (Flood)', flow: 200 },
+    { source: [-118.2, 34.0], target: [-122.4, 37.8], name: 'LA → SF (Wildfire)', flow: 300 },
+    { source: [-87.6, 41.9], target: [-89.4, 43.1], name: 'Chicago → Madison (Tornado)', flow: 150 },
+    { source: [-77.0, 38.9], target: [-71.1, 42.4], name: 'DC → Boston (Blizzard)', flow: 250 },
+];
+
+// Legend
+const legend = document.createElement('div');
+legend.innerHTML = '<div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.85);color:white;padding:12px;border-radius:8px;font-size:11px;z-index:1000;max-width:180px;"><b style="color:#ef4444;">Red Cross Response</b><br><br><span style="color:#ef4444;">●</span> National HQ<br><span style="color:#f59e0b;">●</span> Regional Hubs<br><br>Arc width = supply volume<br>Arc color: <span style="color:#ef4444;">origin</span> → <span style="color:#3b82f6;">destination</span><br><br><i>Hover for route details</i></div>';
+document.getElementById('output-map').appendChild(legend);
+
+new DeckGL({
+    container: 'output-map',
+    mapStyle: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+    initialViewState: { longitude: -95, latitude: 38, zoom: 4, pitch: 35 },
+    controller: true,
+    layers: [
+        new ArcLayer({
+            id: 'routes',
+            data: routes,
+            getSourcePosition: d => d.source,
+            getTargetPosition: d => d.target,
+            getSourceColor: [239, 68, 68],
+            getTargetColor: [59, 130, 246],
+            getWidth: d => d.flow / 50,
+            pickable: true
+        }),
+        new ScatterplotLayer({
+            id: 'hubs',
+            data: hubs,
+            getPosition: d => d.pos,
+            getRadius: d => d.type === 'hq' ? 50000 : 30000,
+            getFillColor: d => d.type === 'hq' ? [239, 68, 68] : [245, 158, 11],
+            pickable: true
+        })
+    ],
+    getTooltip: ({object}) => object && (object.name + (object.flow ? ' (' + object.flow + ' units)' : ''))
+});`
+            },
+
+            // ===== HERE MAPS =====
+            'here-routing': {
+                label: 'here-routing.js',
+                code: `// HERE Maps: Multi-Stop Routing (DC Landmarks)
+const platform = new H.service.Platform({
+    apikey: 'sqIAkjOLcSG49EKQfGWG9OLoU2zdKa-w5lhMcNeJfTI'
+});
+
+const defaultLayers = platform.createDefaultLayers();
+const map = new H.Map(
+    document.getElementById('output-map'),
+    defaultLayers.raster.normal.map,
+    { center: { lat: 38.9, lng: -77.03 }, zoom: 11, pixelRatio: window.devicePixelRatio || 1 }
+);
+
+const behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+const ui = H.ui.UI.createDefault(map, defaultLayers);
+
+// Calculate route: Red Cross HQ → White House → Pentagon
+const router = platform.getRoutingService(null, 8);
+
+const stops = [
+    { lat: 38.9072, lng: -77.0369, name: 'Red Cross HQ', icon: '🏥' },
+    { lat: 38.8977, lng: -77.0365, name: 'White House', icon: '🏛️' },
+    { lat: 38.8719, lng: -77.0563, name: 'Pentagon', icon: '⭐' }
+];
+
+const routingParams = {
+    routingMode: 'fast',
+    transportMode: 'car',
+    origin: stops[0].lat + ',' + stops[0].lng,
+    via: stops[1].lat + ',' + stops[1].lng,
+    destination: stops[2].lat + ',' + stops[2].lng,
+    return: 'polyline,summary'
+};
+
+router.calculateRoute(routingParams, result => {
+    if (result.routes.length) {
+        const route = result.routes[0];
+        let totalDuration = 0;
+        let totalLength = 0;
+
+        route.sections.forEach(section => {
+            const linestring = H.geo.LineString.fromFlexiblePolyline(section.polyline);
+            const routeLine = new H.map.Polyline(linestring, {
+                style: { strokeColor: '#d32f2f', lineWidth: 5 }
+            });
+            map.addObject(routeLine);
+            totalDuration += section.summary.duration;
+            totalLength += section.summary.length;
+        });
+
+        // Add markers with labels
+        stops.forEach((stop, i) => {
+            const marker = new H.map.Marker({ lat: stop.lat, lng: stop.lng });
+            map.addObject(marker);
+        });
+
+        // Add info bubble with route summary
+        const infoContent = '<div style="padding:10px;min-width:180px;"><b>Route Summary</b><br><br>' +
+            stops.map((s, i) => '<span style="color:#d32f2f;">' + (i+1) + '.</span> ' + s.name).join('<br>') +
+            '<br><br><b>Total:</b> ' + (totalLength/1000).toFixed(1) + ' km<br>' +
+            '<b>Est. Time:</b> ' + Math.round(totalDuration/60) + ' min<br>' +
+            '<small style="color:#666;">Mode: Driving (fastest)</small></div>';
+
+        const bubble = new H.ui.InfoBubble({ lat: 38.91, lng: -76.96 }, { content: infoContent });
+        ui.addBubble(bubble);
+
+        map.getViewModel().setLookAtData({ bounds: map.getObjects()[0].getBoundingBox() });
+    }
+}, console.error);
+
+window.activeMap = map;`
+            },
+
+            'here-traffic': {
+                label: 'here-traffic.js',
+                code: `// HERE Maps: Real-time Traffic Incidents (Los Angeles)
+const platform = new H.service.Platform({
+    apikey: 'sqIAkjOLcSG49EKQfGWG9OLoU2zdKa-w5lhMcNeJfTI'
+});
+
+const defaultLayers = platform.createDefaultLayers();
+
+const map = new H.Map(
+    document.getElementById('output-map'),
+    defaultLayers.raster.normal.map,
+    { center: { lat: 34.0522, lng: -118.2437 }, zoom: 11, pixelRatio: window.devicePixelRatio || 1 }
+);
+
+const behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+const ui = H.ui.UI.createDefault(map, defaultLayers);
+
+// Add traffic incidents layer
+map.addLayer(defaultLayers.raster.normal.trafficincidents);
+
+// Add legend info bubble
+const legendContent = '<div style="padding:10px;min-width:180px;">' +
+    '<b>HERE Traffic Incidents</b><br>Los Angeles, CA<br><br>' +
+    '<b>Incident Types:</b><br>' +
+    '<span style="color:#dc2626;">🔴</span> Major delays<br>' +
+    '<span style="color:#f59e0b;">🟠</span> Moderate delays<br>' +
+    '<span style="color:#22c55e;">🟢</span> Minor/Cleared<br><br>' +
+    '<small style="color:#666;">Data updates every few minutes<br>Click incidents for details</small></div>';
+
+const infoBubble = new H.ui.InfoBubble({ lat: 34.12, lng: -118.15 }, {
+    content: legendContent
+});
+ui.addBubble(infoBubble);
+
+window.activeMap = map;`
+            },
+
+            'here-isoline': {
+                label: 'here-isoline.js',
+                code: `// HERE Maps: Drive Time Isoline (Reachability)
+const platform = new H.service.Platform({
+    apikey: 'sqIAkjOLcSG49EKQfGWG9OLoU2zdKa-w5lhMcNeJfTI'
+});
+
+const defaultLayers = platform.createDefaultLayers();
+const map = new H.Map(
+    document.getElementById('output-map'),
+    defaultLayers.raster.normal.map,
+    { center: { lat: 38.9072, lng: -77.0369 }, zoom: 10, pixelRatio: window.devicePixelRatio || 1 }
+);
+
+const behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+const ui = H.ui.UI.createDefault(map, defaultLayers);
+
+// Calculate isoline (areas reachable within X minutes)
+const router = platform.getRoutingService(null, 8);
+
+const isolineParams = {
+    transportMode: 'car',
+    origin: '38.9072,-77.0369',
+    'range[type]': 'time',
+    'range[values]': '600,1200,1800', // 10, 20, 30 minutes
+    return: 'polygonOutline'
+};
+
+// Add center marker
+map.addObject(new H.map.Marker({ lat: 38.9072, lng: -77.0369 }));
+
+// Note: Isoline API requires additional setup
+// Showing concentric circles as approximation
+const colors = ['rgba(34, 197, 94, 0.3)', 'rgba(251, 191, 36, 0.3)', 'rgba(239, 68, 68, 0.3)'];
+const radii = [8000, 15000, 22000]; // meters
+
+radii.forEach((radius, i) => {
+    const circle = new H.map.Circle(
+        { lat: 38.9072, lng: -77.0369 },
+        radius,
+        { style: { strokeColor: colors[i].replace('0.3', '1'), lineWidth: 2, fillColor: colors[i] }}
+    );
+    map.addObject(circle);
+});
+
+// Legend
+const infoBubble = new H.ui.InfoBubble({ lat: 38.95, lng: -76.95 }, {
+    content: '<div style="padding:8px;"><b>Drive Time Zones</b><br><span style="color:#22c55e">●</span> 10 min<br><span style="color:#fbbf24">●</span> 20 min<br><span style="color:#ef4444">●</span> 30 min</div>'
+});
+ui.addBubble(infoBubble);
+
+window.activeMap = map;`
+            },
+
+            // ===== GOOGLE MAPS =====
+            'google-streetview': {
+                label: 'streetview-demo.js',
+                code: `// Street View Demo - White House Location
+// Shows satellite view + street-level context
+const map = L.map('output-map').setView([38.8977, -77.0365], 17);
+
+// Use Esri World Imagery for satellite view
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Esri World Imagery'
+}).addTo(map);
+
+// Add marker at White House
+const whiteHouseIcon = L.divIcon({
+    className: 'custom-marker',
+    html: '<div style="background:#d32f2f;color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:3px solid white;box-shadow:0 2px 10px rgba(0,0,0,0.4);">🏛️</div>',
+    iconSize: [40, 40]
+});
+
+L.marker([38.8977, -77.0365], {icon: whiteHouseIcon})
+    .addTo(map)
+    .bindPopup('<b>The White House</b><br>1600 Pennsylvania Ave NW<br><small style="color:#666;">Washington, DC 20500</small>')
+    .openPopup();
+
+// Add surrounding landmarks
+const landmarks = [
+    { coords: [38.8893, -77.0502], name: 'Lincoln Memorial', icon: '🏛️' },
+    { coords: [38.8895, -77.0353], name: 'Washington Monument', icon: '🗼' },
+    { coords: [38.8899, -77.0091], name: 'US Capitol', icon: '🏛️' }
+];
+
+landmarks.forEach(lm => {
+    L.circleMarker(lm.coords, {
+        radius: 8, fillColor: '#1e40af', fillOpacity: 0.8, color: 'white', weight: 2
+    }).addTo(map).bindPopup('<b>' + lm.name + '</b>');
+});
+
+// Info panel
+const info = L.control({position: 'topright'});
+info.onAdd = () => {
+    const div = L.DomUtil.create('div');
+    div.innerHTML = '<div style="background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);max-width:200px;font-size:12px;"><b>Satellite View</b><br><br>📍 White House<br>Washington, DC<br><br><small style="color:#666;">Google Street View requires API key. Showing satellite imagery via Esri.</small></div>';
+    return div;
+};
+info.addTo(map);
+
+L.control.scale().addTo(map);`
+            },
+
+            'traffic-simulation': {
+                label: 'traffic-sim.js',
+                code: `// Traffic Visualization SIMULATION
+// Demonstrates traffic layer concept with synthetic data
+const map = L.map('output-map').setView([34.0522, -118.2437], 11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+// Simulated traffic corridors (not real-time data)
+const roads = [
+    { coords: [[34.05, -118.35], [34.05, -118.25]], color: '#22c55e', weight: 6, name: 'I-10 West' },
+    { coords: [[34.07, -118.40], [34.05, -118.35]], color: '#f59e0b', weight: 6, name: 'US-101' },
+    { coords: [[34.03, -118.30], [34.05, -118.25]], color: '#dc2626', weight: 6, name: 'I-110' },
+    { coords: [[34.08, -118.30], [34.05, -118.25]], color: '#22c55e', weight: 6, name: 'I-5 South' },
+    { coords: [[34.00, -118.40], [34.05, -118.35]], color: '#f59e0b', weight: 6, name: 'I-405' },
+    { coords: [[34.10, -118.35], [34.07, -118.40]], color: '#dc2626', weight: 6, name: 'SR-134' },
+];
+
+roads.forEach(r => {
+    L.polyline(r.coords, {color: r.color, weight: r.weight, opacity: 0.8})
+        .addTo(map)
+        .bindPopup('<b>' + r.name + '</b><br><span style="color:' + r.color + '">●</span> ' + (r.color === '#22c55e' ? 'Free flow' : r.color === '#f59e0b' ? 'Moderate delay' : 'Heavy congestion'));
+});
+
+// Add prominent SIMULATION banner
+const banner = L.control({position: 'topleft'});
+banner.onAdd = () => {
+    const div = L.DomUtil.create('div');
+    div.innerHTML = '<div style="background:#fef3c7;border:2px solid #f59e0b;padding:8px 12px;border-radius:6px;font-size:11px;font-weight:600;color:#92400e;">⚠️ SIMULATION - Not Real Traffic Data</div>';
+    return div;
+};
+banner.addTo(map);
+
+const legend = L.control({position: 'topright'});
+legend.onAdd = () => {
+    const div = L.DomUtil.create('div');
+    div.innerHTML = '<div style="background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);font-size:12px;"><b>Traffic Flow Legend</b><br><br><span style="color:#22c55e">━━</span> Free flow (>50 mph)<br><span style="color:#f59e0b">━━</span> Moderate (25-50 mph)<br><span style="color:#dc2626">━━</span> Heavy (<25 mph)<br><br><small style="color:#666;">Los Angeles, CA<br>Click roads for details</small></div>';
+    return div;
+};
+legend.addTo(map);
+
+L.control.scale().addTo(map);`
+            },
+
+            'osm-hospitals': {
+                label: 'osm-places.js',
+                code: `// OpenStreetMap: Hospital Search (Overpass API)
+// Queries OSM data via free Overpass API
+const map = L.map('output-map').setView([38.9072, -77.0369], 12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+// Query hospitals in DC area using Overpass API
+const overpassUrl = 'https://overpass-api.de/api/interpreter';
+const query = '[out:json];node[amenity=hospital](38.85,-77.1,38.95,-76.95);out;';
+
+// Loading indicator
+const loadingDiv = document.createElement('div');
+loadingDiv.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:16px 24px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.2);z-index:1000;font-size:14px;">Loading hospitals from OpenStreetMap...</div>';
+document.getElementById('output-map').appendChild(loadingDiv);
+
+fetch(overpassUrl, { method: 'POST', body: query })
+.then(r => r.json())
+.then(data => {
+    loadingDiv.remove();
+    const markers = L.featureGroup();
+
+    data.elements.forEach(el => {
+        const icon = L.divIcon({
+            className: 'hospital-marker',
+            html: '<div style="background:#d32f2f;color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">🏥</div>',
+            iconSize: [28, 28]
+        });
+        L.marker([el.lat, el.lon], {icon})
+            .bindPopup('<b>' + (el.tags.name || 'Hospital') + '</b>' + (el.tags['addr:street'] ? '<br><small>' + el.tags['addr:street'] + '</small>' : ''))
+            .addTo(markers);
+    });
+    markers.addTo(map);
+
+    const info = L.control({position: 'topright'});
+    info.onAdd = () => {
+        const div = L.DomUtil.create('div');
+        div.innerHTML = '<div style="background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);font-size:12px;"><b style="color:#d32f2f;">' + data.elements.length + ' Hospitals Found</b><br><br>📍 Washington, DC area<br><br><small style="color:#666;"><b>Data Source:</b><br>OpenStreetMap via<br>Overpass API (free)</small></div>';
+        return div;
+    };
+    info.addTo(map);
+}).catch(e => {
+    loadingDiv.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fef2f2;border:1px solid #fca5a5;padding:16px 24px;border-radius:8px;z-index:1000;font-size:14px;color:#b91c1c;">Error loading OSM data</div>';
+});
+
+L.control.scale().addTo(map);`
+            },
+
+            'maplibre-heatmap-sf': {
+                label: 'maplibre-heatmap-sf.js',
+                code: `// MapLibre: Incident Density Heatmap (San Francisco)
+// Simulated emergency call density around SF neighborhoods
+const map = new maplibregl.Map({
+    container: 'output-map',
+    style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+    center: [-122.434, 37.775],
+    zoom: 12
+});
+
+map.on('load', () => {
+    // Simulate incident clusters in SF neighborhoods
+    const hotspots = [
+        { center: [-122.410, 37.785], count: 150, name: 'Tenderloin' },
+        { center: [-122.405, 37.790], count: 100, name: 'Union Square' },
+        { center: [-122.415, 37.775], count: 80, name: 'Civic Center' },
+        { center: [-122.395, 37.795], count: 60, name: 'Financial District' },
+        { center: [-122.420, 37.765], count: 70, name: 'Mission' }
+    ];
+
+    const points = [];
+    hotspots.forEach(h => {
+        for (let i = 0; i < h.count; i++) {
+            points.push({
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: [
+                        h.center[0] + (Math.random() - 0.5) * 0.02,
+                        h.center[1] + (Math.random() - 0.5) * 0.015
+                    ]
+                },
+                properties: { weight: Math.random() * 3 + 1 }
+            });
+        }
+    });
+
+    map.addSource('heat', { type: 'geojson', data: { type: 'FeatureCollection', features: points }});
+    map.addLayer({
+        id: 'heat',
+        type: 'heatmap',
+        source: 'heat',
+        paint: {
+            'heatmap-weight': ['get', 'weight'],
+            'heatmap-intensity': 1.2,
+            'heatmap-color': [
+                'interpolate', ['linear'], ['heatmap-density'],
+                0, 'rgba(0,0,0,0)', 0.2, '#06b6d4', 0.4, '#22c55e',
+                0.6, '#eab308', 0.8, '#f97316', 1, '#dc2626'
+            ],
+            'heatmap-radius': 25
+        }
+    });
+
+    // Legend
+    const legend = document.createElement('div');
+    legend.innerHTML = '<div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.85);color:white;padding:12px;border-radius:8px;font-size:11px;z-index:1000;"><b>SF Incident Density</b><br>(Simulated Data)<br><br><div style="display:flex;align-items:center;gap:8px;"><div style="width:80px;height:12px;background:linear-gradient(to right,#06b6d4,#22c55e,#eab308,#f97316,#dc2626);border-radius:2px;"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;width:80px;"><span>Low</span><span>High</span></div></div>';
+    document.getElementById('output-map').appendChild(legend);
+});
+
+map.addControl(new maplibregl.NavigationControl());`
+            },
+
+            // ===== CESIUM 3D GLOBE =====
+            'cesium-globe': {
+                label: 'cesium-globe.js',
+                code: `// Cesium: Interactive 3D Globe (Red Cross National HQ)
+Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6OTYyMCwic2NvcGVzIjpbImFzbCIsImFzciIsImdjIl0sImlhdCI6MTU2Mjg2NjI3M30.93b2HY8UkTJ8mGqui8sUbLwh_18dCHx6e6U6JN9RBWY';
+
+const viewer = new Cesium.Viewer('output-map', {
+    animation: false,
+    timeline: false,
+    baseLayerPicker: false
+});
+
+// Load terrain asynchronously
+(async () => {
+    try {
+        viewer.scene.terrainProvider = await Cesium.CesiumTerrainProvider.fromIonAssetId(1);
+    } catch(e) { console.log('Terrain not loaded:', e); }
+})();
+
+// Fly to Red Cross HQ in Washington DC
+viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(-77.0369, 38.9072, 15000),
+    orientation: {
+        heading: Cesium.Math.toRadians(0),
+        pitch: Cesium.Math.toRadians(-45),
+        roll: 0
+    }
+});
+
+// Add marker for Red Cross HQ
+viewer.entities.add({
+    position: Cesium.Cartesian3.fromDegrees(-77.0369, 38.9072),
+    point: { pixelSize: 15, color: Cesium.Color.RED, outlineColor: Cesium.Color.WHITE, outlineWidth: 2 },
+    label: { text: 'Red Cross National HQ', font: '14px sans-serif', verticalOrigin: Cesium.VerticalOrigin.BOTTOM, pixelOffset: new Cesium.Cartesian2(0, -20) }
+});
+
+// Add info panel
+const infoDiv = document.createElement('div');
+infoDiv.innerHTML = '<div style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.8);color:white;padding:12px;border-radius:8px;font-size:12px;z-index:1000;max-width:200px;"><b style="color:#ef4444;">American Red Cross</b><br>National Headquarters<br><br>📍 Washington, DC<br>🌐 3D Globe View<br><br><i style="color:#9ca3af;font-size:11px;">Scroll to zoom<br>Drag to rotate<br>Right-drag to tilt</i></div>';
+document.getElementById('output-map').appendChild(infoDiv);
+
+window.activeMap = viewer;`
+            },
+
+            'cesium-flight': {
+                label: 'cesium-flight.js',
+                code: `// Cesium: 3D Flight Path Visualization
+Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6OTYyMCwic2NvcGVzIjpbImFzbCIsImFzciIsImdjIl0sImlhdCI6MTU2Mjg2NjI3M30.93b2HY8UkTJ8mGqui8sUbLwh_18dCHx6e6U6JN9RBWY';
+
+const viewer = new Cesium.Viewer('output-map', {
+    animation: false, timeline: false, baseLayerPicker: false
+});
+
+// Load terrain asynchronously
+(async () => {
+    try {
+        viewer.scene.terrainProvider = await Cesium.CesiumTerrainProvider.fromIonAssetId(1);
+    } catch(e) { console.log('Terrain not loaded:', e); }
+})();
+
+// Flight path: NYC to London
+const flightPath = [
+    { lon: -74.006, lat: 40.7128, alt: 0 },
+    { lon: -70, lat: 42, alt: 10000 },
+    { lon: -50, lat: 50, alt: 11000 },
+    { lon: -20, lat: 52, alt: 11000 },
+    { lon: -0.1276, lat: 51.5074, alt: 0 }
+];
+
+const positions = flightPath.map(p => Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt));
+
+viewer.entities.add({
+    polyline: {
+        positions: positions,
+        width: 3,
+        material: new Cesium.PolylineGlowMaterialProperty({
+            glowPower: 0.2,
+            color: Cesium.Color.RED
+        })
+    }
+});
+
+// Markers at endpoints
+viewer.entities.add({ position: positions[0], point: { pixelSize: 12, color: Cesium.Color.GREEN }, label: { text: 'JFK', font: '12px sans-serif' }});
+viewer.entities.add({ position: positions[positions.length-1], point: { pixelSize: 12, color: Cesium.Color.BLUE }, label: { text: 'LHR', font: '12px sans-serif' }});
+
+viewer.zoomTo(viewer.entities);
+window.activeMap = viewer;`
+            },
+
+            'cesium-terrain': {
+                label: 'cesium-terrain.js',
+                code: `// Cesium: Grand Canyon 3D Terrain
+Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6OTYyMCwic2NvcGVzIjpbImFzbCIsImFzciIsImdjIl0sImlhdCI6MTU2Mjg2NjI3M30.93b2HY8UkTJ8mGqui8sUbLwh_18dCHx6e6U6JN9RBWY';
+
+const viewer = new Cesium.Viewer('output-map', {
+    animation: false, timeline: false, baseLayerPicker: false
+});
+
+// Load terrain asynchronously then fly to Grand Canyon
+(async () => {
+    try {
+        viewer.scene.terrainProvider = await Cesium.CesiumTerrainProvider.fromIonAssetId(1);
+    } catch(e) { console.log('Terrain not loaded:', e); }
+
+    viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(-112.1129, 36.0544, 8000),
+        orientation: {
+            heading: Cesium.Math.toRadians(45),
+            pitch: Cesium.Math.toRadians(-30),
+            roll: 0
+        },
+        duration: 2
+    });
+})();
+
+// Add viewpoint marker
+viewer.entities.add({
+    position: Cesium.Cartesian3.fromDegrees(-112.1129, 36.0544, 2100),
+    point: { pixelSize: 10, color: Cesium.Color.YELLOW, outlineColor: Cesium.Color.BLACK, outlineWidth: 1 },
+    label: { text: 'South Rim Viewpoint', font: '12px sans-serif', verticalOrigin: Cesium.VerticalOrigin.BOTTOM }
+});
+
+// Add info panel
+const infoDiv = document.createElement('div');
+infoDiv.innerHTML = '<div style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.8);color:white;padding:12px;border-radius:8px;font-size:12px;z-index:1000;max-width:200px;"><b style="color:#f59e0b;">Grand Canyon</b><br>National Park<br><br>🏜️ Depth: ~1,857m (6,093 ft)<br>📏 Length: 446 km<br>🕰️ Age: 5-6 million years<br><br><i style="color:#9ca3af;font-size:11px;">Pan to explore terrain<br>Cesium World Terrain</i></div>';
+document.getElementById('output-map').appendChild(infoDiv);
+
+window.activeMap = viewer;`
+            },
+
+            // ===== TURF.JS SPATIAL ANALYSIS =====
+            'turf-buffer': {
+                label: 'turf-buffer.js',
+                code: `// Turf.js: Buffer Analysis
+const map = L.map('output-map').setView([38.9, -77.03], 12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+// Create points representing shelters
+const shelters = [
+    [-77.0369, 38.9072],
+    [-77.0565, 38.8719],
+    [-77.0365, 38.8977],
+    [-77.009, 38.889]
+];
+
+shelters.forEach((coords, i) => {
+    // Original point
+    const point = turf.point(coords);
+    L.circleMarker([coords[1], coords[0]], {
+        radius: 8, fillColor: '#d32f2f', fillOpacity: 1, color: 'white', weight: 2
+    }).addTo(map).bindPopup('Shelter ' + (i+1));
+
+    // 1km buffer
+    const buffered = turf.buffer(point, 1, {units: 'kilometers'});
+    L.geoJSON(buffered, {
+        style: { fillColor: '#d32f2f', fillOpacity: 0.15, color: '#d32f2f', weight: 2 }
+    }).addTo(map);
+});
+
+// Legend
+const legend = L.control({position: 'topright'});
+legend.onAdd = () => {
+    const div = L.DomUtil.create('div');
+    div.innerHTML = '<div style="background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);"><b>Turf.js Buffer</b><br>1km service radius<br>around each shelter</div>';
+    return div;
+};
+legend.addTo(map);`
+            },
+
+            'turf-voronoi': {
+                label: 'turf-voronoi.js',
+                code: `// Turf.js: Voronoi Service Areas
+const map = L.map('output-map').setView([38.9, -77.03], 11);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+// Generate random facility locations
+const points = [];
+for (let i = 0; i < 12; i++) {
+    points.push(turf.point([
+        -77.03 + (Math.random() - 0.5) * 0.15,
+        38.9 + (Math.random() - 0.5) * 0.1
+    ], { name: 'Facility ' + (i+1) }));
+}
+
+const fc = turf.featureCollection(points);
+
+// Create Voronoi polygons
+const bbox = [-77.15, 38.82, -76.9, 38.98];
+const voronoi = turf.voronoi(fc, {bbox: bbox});
+
+// Random colors for each zone
+const colors = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#8b5cf6','#ec4899','#6366f1','#06b6d4','#84cc16','#f43f5e'];
+
+voronoi.features.forEach((f, i) => {
+    L.geoJSON(f, {
+        style: { fillColor: colors[i % colors.length], fillOpacity: 0.4, color: '#333', weight: 1 }
+    }).addTo(map);
+});
+
+// Add points on top
+points.forEach((p, i) => {
+    L.circleMarker([p.geometry.coordinates[1], p.geometry.coordinates[0]], {
+        radius: 8, fillColor: colors[i % colors.length], fillOpacity: 1, color: 'white', weight: 2
+    }).addTo(map).bindPopup(p.properties.name);
+});
+
+const legend = L.control({position: 'topright'});
+legend.onAdd = () => {
+    const div = L.DomUtil.create('div');
+    div.innerHTML = '<div style="background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);"><b>Voronoi Diagram</b><br>Nearest-facility zones<br>for 12 facilities</div>';
+    return div;
+};
+legend.addTo(map);`
+            },
+
+            'turf-isolines': {
+                label: 'turf-isolines.js',
+                code: `// Turf.js: Contour/Isoline Generation
+const map = L.map('output-map').setView([38.9, -77.03], 12);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+// Generate a grid of "elevation" values (simulating terrain)
+const points = [];
+for (let x = -77.1; x < -76.95; x += 0.008) {
+    for (let y = 38.85; y < 38.98; y += 0.008) {
+        // Create synthetic elevation based on distance from center
+        const dist = Math.sqrt(Math.pow(x + 77.03, 2) + Math.pow(y - 38.9, 2));
+        const elevation = Math.max(0, 100 - dist * 500 + Math.random() * 15);
+        points.push(turf.point([x, y], { elevation: elevation }));
+    }
+}
+
+const fc = turf.featureCollection(points);
+
+// Generate isobands with breaks [0, 25, 50, 75, 100]
+const breaks = [0, 25, 50, 75, 100];
+const bandColors = {
+    '0-25': '#dcfce7',
+    '25-50': '#fef9c3',
+    '50-75': '#fed7aa',
+    '75-100': '#fecaca'
+};
+
+try {
+    const isobands = turf.isobands(fc, breaks, { zProperty: 'elevation' });
+    L.geoJSON(isobands, {
+        style: f => {
+            // Extract the band range from the feature properties
+            const bandKey = f.properties.elevation;
+            return {
+                fillColor: bandColors[bandKey] || '#e5e7eb',
+                fillOpacity: 0.6,
+                color: '#666',
+                weight: 1
+            };
+        }
+    }).addTo(map);
+} catch(e) { console.log('Isobands error:', e); }
+
+// Show sample points
+points.filter((_, i) => i % 25 === 0).forEach(p => {
+    L.circleMarker([p.geometry.coordinates[1], p.geometry.coordinates[0]], {
+        radius: 3, fillColor: '#333', fillOpacity: 0.5, stroke: false
+    }).addTo(map);
+});
+
+const legend = L.control({position: 'topright'});
+legend.onAdd = () => {
+    const div = L.DomUtil.create('div');
+    div.innerHTML = '<div style="background:white;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);font-size:12px;"><b>Elevation Contours</b><br><br><span style="background:#fecaca;padding:2px 8px;border-radius:3px;">75-100m</span><br><span style="background:#fed7aa;padding:2px 8px;border-radius:3px;">50-75m</span><br><span style="background:#fef9c3;padding:2px 8px;border-radius:3px;">25-50m</span><br><span style="background:#dcfce7;padding:2px 8px;border-radius:3px;">0-25m</span><br><br><small style="color:#666;">Generated from point grid<br>using turf.isobands()</small></div>';
+    return div;
+};
+legend.addTo(map);`
+            },
+
+            // ===== DECK.GL HEXAGONS =====
+            'deckgl-hexagons': {
+                label: 'deckgl-hexagons.js',
+                code: `// Deck.gl: NYC Taxi Pickup Hotspots
+// Real pattern: simulated taxi pickups around Manhattan landmarks
+const {DeckGL, HexagonLayer} = deck;
+
+// Simulate taxi pickups clustered around real NYC hotspots
+const hotspots = [
+    { center: [-73.985, 40.748], weight: 500, name: 'Times Square' },
+    { center: [-73.968, 40.785], weight: 300, name: 'Central Park' },
+    { center: [-74.013, 40.713], weight: 400, name: 'World Trade Center' },
+    { center: [-73.977, 40.752], weight: 350, name: 'Grand Central' },
+    { center: [-73.993, 40.750], weight: 250, name: 'Penn Station' },
+    { center: [-73.958, 40.800], weight: 150, name: 'Columbia Univ' },
+];
+
+const data = [];
+hotspots.forEach(h => {
+    for (let i = 0; i < h.weight; i++) {
+        data.push({
+            position: [
+                h.center[0] + (Math.random() - 0.5) * 0.015,
+                h.center[1] + (Math.random() - 0.5) * 0.01
+            ]
+        });
+    }
+});
+
+// Add legend
+const legend = document.createElement('div');
+legend.innerHTML = '<div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.8);color:white;padding:12px;border-radius:8px;font-size:12px;z-index:1000;"><b>NYC Taxi Pickups</b><br><span style="color:#fef3c7">■</span> Low density<br><span style="color:#f97316">■</span> Medium<br><span style="color:#dc2626">■</span> High density<br><br>Height = pickup count<br>~2000 simulated trips</div>';
+document.getElementById('output-map').appendChild(legend);
+
+new DeckGL({
+    container: 'output-map',
+    mapStyle: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+    initialViewState: {
+        longitude: -73.98,
+        latitude: 40.75,
+        zoom: 12,
+        pitch: 50,
+        bearing: -20
+    },
+    controller: true,
+    layers: [
+        new HexagonLayer({
+            id: 'hexagons',
+            data: data,
+            getPosition: d => d.position,
+            radius: 100,
+            elevationScale: 8,
+            extruded: true,
+            coverage: 0.9,
+            colorRange: [
+                [254, 243, 199],
+                [253, 224, 139],
+                [249, 115, 22],
+                [234, 88, 12],
+                [220, 38, 38],
+                [153, 27, 27]
+            ],
+            pickable: true
+        })
+    ],
+    getTooltip: ({object}) => object && object.count + ' pickups in this area'
+});`
+            },
+
+            'earthquake-live': {
+                label: 'usgs-earthquakes.js',
+                code: `// USGS Live Earthquakes (Past 7 Days)
+const map = L.map('output-map').setView([20, -160], 2);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© CARTO'
+}).addTo(map);
+
+fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson')
+    .then(r => r.json())
+    .then(data => {
+        L.geoJSON(data, {
+            pointToLayer: (f, latlng) => {
+                const mag = f.properties.mag;
+                return L.circleMarker(latlng, {
+                    radius: Math.pow(2, mag) / 2,
+                    fillColor: mag >= 6 ? '#dc2626' : mag >= 5 ? '#f97316' : '#fbbf24',
+                    fillOpacity: 0.7,
+                    color: 'white',
+                    weight: 1
+                });
+            },
+            onEachFeature: (f, layer) => {
+                const d = new Date(f.properties.time);
+                layer.bindPopup('<b>M' + f.properties.mag.toFixed(1) + '</b><br>' + f.properties.place + '<br><small>' + d.toLocaleString() + '</small>');
+            }
+        }).addTo(map);
+
+        // Add count
+        const info = L.control({position: 'topright'});
+        info.onAdd = () => {
+            const div = L.DomUtil.create('div');
+            div.innerHTML = '<div style="background:#1f2937;color:white;padding:12px;border-radius:8px;"><b>' + data.features.length + '</b> earthquakes M4.5+<br><small>Past 7 days</small></div>';
+            return div;
+        };
+        info.addTo(map);
+    });`
+            }
+        };
+
+        function loadDemo(name) {
+            const demo = DEMOS[name];
+            if (!demo) return;
+
+            // Update code editor
+            document.getElementById('codeEditor').value = demo.code;
+
+            // Run it
+            executeCode();
+        }
+
+        function loadDemoFromSelect() {
+            const select = document.getElementById('demoSelect');
+            loadDemo(select.value);
+        }
+
+        function executeCode() {
+            const code = document.getElementById('codeEditor').value;
+            const container = document.getElementById('output-map');
+
+            // Cleanup ALL previous maps/viewers
+            if (window.activeMap) {
+                try { window.activeMap.remove(); } catch(e) {}
+                try { window.activeMap.destroy(); } catch(e) {}
+                try { window.activeMap.dispose && window.activeMap.dispose(); } catch(e) {}
+                try { window.activeMap.setCenter && window.activeMap.dispose(); } catch(e) {} // HERE maps
+                window.activeMap = null;
+            }
+
+            // Remove Leaflet's internal container reference
+            if (container._leaflet_id) {
+                delete container._leaflet_id;
+            }
+
+            // Clear container and reset
+            container.innerHTML = '';
+            container.removeAttribute('class');
+            container.style.cssText = 'height: 100%; width: 100%;';
+
+            // Execute after DOM settles
+            setTimeout(() => {
+                try {
+                    // Check if code uses ArcGIS AMD require
+                    if (code.includes('require([')) {
+                        // ArcGIS AMD modules - execute directly in global scope
+                        eval(code);
+                    } else {
+                        // Use Function constructor for other libraries
+                        const fn = new Function('L', 'mapboxgl', 'maplibregl', 'Cesium', 'turf', 'deck', 'google', 'H', `
+                            ${code}
+                            if (typeof map !== 'undefined') window.activeMap = map;
+                            if (typeof view !== 'undefined') window.activeMap = view;
+                            if (typeof viewer !== 'undefined') window.activeMap = viewer;
+                            if (typeof panorama !== 'undefined') window.activeMap = panorama;
+                        `);
+                        fn(L, mapboxgl, maplibregl, Cesium, turf, deck, google, H);
+                    }
+                } catch (e) {
+                    console.error('Playground error:', e);
+                    container.innerHTML = '<div style="padding:2rem;color:#d32f2f;text-align:center;height:100%;display:flex;flex-direction:column;justify-content:center;"><div style="font-size:2rem;margin-bottom:1rem;">⚠️</div><b>Error</b><p style="margin-top:0.5rem;font-family:monospace;font-size:0.85rem;">' + e.message + '</p></div>';
+                }
+            }, 100);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('GIS Open Laboratory loaded');
+        });
+    </script>
+</body>
+</html>
