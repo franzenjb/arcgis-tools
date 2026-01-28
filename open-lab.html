@@ -1,5 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- 
+SECURITY UPDATE: 2026-01-28
+All API tokens have been moved to environment variables.
+Set the following environment variables:
+- MAPBOX_ACCESS_TOKEN
+- CESIUM_ION_ACCESS_TOKEN  
+- ARCGIS_API_KEY
+-->
+
+<script>
+// Token configuration
+const MAPBOX_ACCESS_TOKEN = window.MAPBOX_ACCESS_TOKEN || process.env.MAPBOX_ACCESS_TOKEN || 'YOUR_MAPBOX_ACCESS_TOKEN_HERE';
+const CESIUM_ION_ACCESS_TOKEN = window.CESIUM_ION_ACCESS_TOKEN || process.env.CESIUM_ION_ACCESS_TOKEN || 'YOUR_CESIUM_ION_ACCESS_TOKEN_HERE';
+const ARCGIS_API_KEY = window.ARCGIS_API_KEY || process.env.ARCGIS_API_KEY || 'YOUR_ARCGIS_API_KEY_HERE';
+</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2203,7 +2218,7 @@ legend.addTo(map);`
             'mapbox-3d-terrain': {
                 label: 'mapbox-terrain.js',
                 code: `// Mapbox: 3D Terrain + Fog + Sky (Yosemite National Park)
-mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+mapboxgl.accessToken = window.MAPBOX_ACCESS_TOKEN || process.env.MAPBOX_ACCESS_TOKEN || 'YOUR_MAPBOX_ACCESS_TOKEN_HERE';
 
 const map = new mapboxgl.Map({
     container: 'output-map',
@@ -2242,7 +2257,7 @@ map.addControl(new mapboxgl.NavigationControl());`
             'mapbox-animate': {
                 label: 'mapbox-animate.js',
                 code: `// Mapbox: Animated Flight Path (DC → LA)
-mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+mapboxgl.accessToken = window.MAPBOX_ACCESS_TOKEN || process.env.MAPBOX_ACCESS_TOKEN || 'YOUR_MAPBOX_ACCESS_TOKEN_HERE';
 
 const map = new mapboxgl.Map({
     container: 'output-map',
@@ -2315,7 +2330,7 @@ map.on('load', () => {
             'mapbox-heatmap': {
                 label: 'mapbox-heatmap.js',
                 code: `// Mapbox: Earthquake Heatmap (live USGS 7-day data)
-mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+mapboxgl.accessToken = window.MAPBOX_ACCESS_TOKEN || process.env.MAPBOX_ACCESS_TOKEN || 'YOUR_MAPBOX_ACCESS_TOKEN_HERE';
 
 const map = new mapboxgl.Map({
     container: 'output-map',
@@ -2706,7 +2721,7 @@ new DeckGL({
                 label: 'here-routing.js',
                 code: `// HERE Maps: Multi-Stop Routing (DC Landmarks)
 const platform = new H.service.Platform({
-    apikey: 'sqIAkjOLcSG49EKQfGWG9OLoU2zdKa-w5lhMcNeJfTI'
+    apikey: window.ARCGIS_API_KEY || process.env.ARCGIS_API_KEY || 'YOUR_ARCGIS_API_KEY_HERE'
 });
 
 const defaultLayers = platform.createDefaultLayers();
@@ -2780,7 +2795,7 @@ window.activeMap = map;`
                 label: 'here-traffic.js',
                 code: `// HERE Maps: Real-time Traffic Incidents (Los Angeles)
 const platform = new H.service.Platform({
-    apikey: 'sqIAkjOLcSG49EKQfGWG9OLoU2zdKa-w5lhMcNeJfTI'
+    apikey: window.ARCGIS_API_KEY || process.env.ARCGIS_API_KEY || 'YOUR_ARCGIS_API_KEY_HERE'
 });
 
 const defaultLayers = platform.createDefaultLayers();
@@ -2818,7 +2833,7 @@ window.activeMap = map;`
                 label: 'here-isoline.js',
                 code: `// HERE Maps: Drive Time Isoline (Reachability)
 const platform = new H.service.Platform({
-    apikey: 'sqIAkjOLcSG49EKQfGWG9OLoU2zdKa-w5lhMcNeJfTI'
+    apikey: window.ARCGIS_API_KEY || process.env.ARCGIS_API_KEY || 'YOUR_ARCGIS_API_KEY_HERE'
 });
 
 const defaultLayers = platform.createDefaultLayers();
@@ -3076,7 +3091,7 @@ map.addControl(new maplibregl.NavigationControl());`
             'cesium-globe': {
                 label: 'cesium-globe.js',
                 code: `// Cesium: Interactive 3D Globe (Red Cross National HQ)
-Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6OTYyMCwic2NvcGVzIjpbImFzbCIsImFzciIsImdjIl0sImlhdCI6MTU2Mjg2NjI3M30.93b2HY8UkTJ8mGqui8sUbLwh_18dCHx6e6U6JN9RBWY';
+Cesium.Ion.defaultAccessToken = window.CESIUM_ION_ACCESS_TOKEN || process.env.CESIUM_ION_ACCESS_TOKEN || 'YOUR_CESIUM_ION_ACCESS_TOKEN_HERE';
 
 const viewer = new Cesium.Viewer('output-map', {
     animation: false,
@@ -3119,7 +3134,7 @@ window.activeMap = viewer;`
             'cesium-flight': {
                 label: 'cesium-flight.js',
                 code: `// Cesium: 3D Flight Path Visualization
-Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6OTYyMCwic2NvcGVzIjpbImFzbCIsImFzciIsImdjIl0sImlhdCI6MTU2Mjg2NjI3M30.93b2HY8UkTJ8mGqui8sUbLwh_18dCHx6e6U6JN9RBWY';
+Cesium.Ion.defaultAccessToken = window.CESIUM_ION_ACCESS_TOKEN || process.env.CESIUM_ION_ACCESS_TOKEN || 'YOUR_CESIUM_ION_ACCESS_TOKEN_HERE';
 
 const viewer = new Cesium.Viewer('output-map', {
     animation: false, timeline: false, baseLayerPicker: false
@@ -3165,7 +3180,7 @@ window.activeMap = viewer;`
             'cesium-terrain': {
                 label: 'cesium-terrain.js',
                 code: `// Cesium: Grand Canyon 3D Terrain
-Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6OTYyMCwic2NvcGVzIjpbImFzbCIsImFzciIsImdjIl0sImlhdCI6MTU2Mjg2NjI3M30.93b2HY8UkTJ8mGqui8sUbLwh_18dCHx6e6U6JN9RBWY';
+Cesium.Ion.defaultAccessToken = window.CESIUM_ION_ACCESS_TOKEN || process.env.CESIUM_ION_ACCESS_TOKEN || 'YOUR_CESIUM_ION_ACCESS_TOKEN_HERE';
 
 const viewer = new Cesium.Viewer('output-map', {
     animation: false, timeline: false, baseLayerPicker: false

@@ -2,15 +2,25 @@
 
 Production-ready tools for managing ArcGIS Online content programmatically.
 
+## ⚠️ Security Notice (2026-01-28)
+
+**Important Security Update:** All API tokens have been moved to environment variables. 
+Exposed tokens have been removed from the codebase. Please:
+1. Rotate your exposed tokens immediately (see `SECURITY_README.md`)
+2. Set up environment variables using `.env.example`
+3. Never commit `.env` to version control
+
+[View Security Update Details](SECURITY_README.md)
+
 ## Quick Start
 
 ```bash
 # 1. Install dependencies
 pip install -r requirements.txt
 
-# 2. Set up credentials
+# 2. Set up credentials (SECURITY CRITICAL)
 cp .env.example .env
-# Edit .env with your credentials
+# Edit .env with your credentials (NEVER commit this file!)
 
 # 3. Test connection
 python auth.py
